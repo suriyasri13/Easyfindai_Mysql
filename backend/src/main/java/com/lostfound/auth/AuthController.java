@@ -20,7 +20,6 @@ public class AuthController {
     // REGISTER API
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody User user) {
-
         Map<String, Object> response = new HashMap<>();
 
         try {

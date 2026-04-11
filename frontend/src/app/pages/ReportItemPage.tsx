@@ -155,48 +155,7 @@ export default function ReportItemPage() {
   };
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  //  check if user exists
-  if (!user) {
-    toast.error("Please login first");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("itemType", itemType);
-  if (!user) {
-    toast.error("Please login first");
-    return;
-  }
-  formData.append("userId", user.userId.toString());  
-  formData.append("itemName", itemName);
-  formData.append("category", category);
-  formData.append("description", description);
-  formData.append("contactInfo", contactInfo);
-  formData.append("dateLost", date);
-  // Determine the effective location: prioritize manual storageLocation if set for found items,
-  // but fall back to the GPS location if available.
-  const finalLocation = itemType === "found" 
-    ? (storageLocation || location) 
-    : location;
-
-  formData.append("location", finalLocation);
-
-  if (imageFile) {
-    formData.append("image", imageFile);
-  }
-
-  try {
-    console.log("Submitting form data to:", itemType === "lost" ? "lost-items" : "found-items");
-    console.log("Submitting with location:", finalLocation);
-    
-    const response = await reportItem(formData);
-    console.log("Server Response:", response);
-    toast.success("Item reported successfully!");
-    
-    // Reset form after success
+  const resetForm = () => {
     setItemName('');
     setCategory('');
     setDescription('');
@@ -207,28 +166,64 @@ export default function ReportItemPage() {
     setImagePreview(null);
     setImageFile(null);
     setUseCurrentLocation(false);
+    setIsConfidential(false);
+    setUniqueIdentifier('');
+    setHiddenDetail('');
+    setCurrentCoords(null);
+  };
 
-  } catch (error: any) {
-    console.error("Submission Error Details:", error);
-    // Directly show the error message from the background
-    toast.error(error.message || "Failed to report item");
-  }
-};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user) {
+      toast.error("Please login first");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("itemType", itemType);
+    formData.append("userId", user.userId.toString());  
+    formData.append("itemName", itemName);
+    formData.append("category", category);
+    formData.append("description", description);
+    formData.append("contactInfo", contactInfo);
+    formData.append("dateLost", date);
+    
+    const finalLocation = itemType === "found" 
+      ? (storageLocation || location) 
+      : location;
+
+    formData.append("location", finalLocation);
+
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+
+    try {
+      await reportItem(formData);
+      toast.success("Item reported successfully!");
+      resetForm();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to report item");
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-3xl mb-6 text-[#1E2A44] font-semibold">Report Item</h2>
+    <div className="max-w-3xl mx-auto pb-12">
+      <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-3xl text-[#1E2A44] font-bold tracking-tight">Report Item</h2>
+        </div>
 
         {/* Item Type Selection */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 mb-8">
           <button
             type="button"
             onClick={() => setItemType('lost')}
-            className={`flex-1 py-3 rounded-xl transition-all font-medium text-base ${
+            className={`flex-1 py-4 rounded-xl transition-all font-bold text-base shadow-sm ${
               itemType === 'lost'
-                ? 'bg-[#EF4444] text-white border-2 border-[#EF4444] shadow-lg'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#EF4444] text-white ring-4 ring-red-100'
+                : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border-2 border-transparent'
             }`}
           >
             Report Lost Item
@@ -236,10 +231,10 @@ export default function ReportItemPage() {
           <button
             type="button"
             onClick={() => setItemType('found')}
-            className={`flex-1 py-3 rounded-xl transition-all font-medium text-base ${
+            className={`flex-1 py-4 rounded-xl transition-all font-bold text-base shadow-sm ${
               itemType === 'found'
-                ? 'bg-[#3B82F6] text-white border-2 border-[#3B82F6] shadow-lg'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#3B82F6] text-white ring-4 ring-blue-100'
+                : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border-2 border-transparent'
             }`}
           >
             Report Found Item
@@ -494,16 +489,26 @@ export default function ReportItemPage() {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className={`w-full py-6 text-white font-semibold text-base shadow-md hover:shadow-lg transition-all ${
-              itemType === 'lost'
-                ? 'bg-[#EF4444] hover:bg-[#DC2626]'
-                : 'bg-[#3B82F6] hover:bg-[#2563EB]'
-            }`}
-          >
-            Submit {itemType === 'lost' ? 'Lost' : 'Found'} Item Report
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button
+              type="button"
+              onClick={resetForm}
+              variant="outline"
+              className="flex-1 py-6 border-2 border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-base transition-all"
+            >
+              Clear Form
+            </Button>
+            <Button
+              type="submit"
+              className={`flex-[2] py-6 text-white font-bold text-base shadow-md hover:shadow-xl transition-all ${
+                itemType === 'lost'
+                  ? 'bg-[#EF4444] hover:bg-[#DC2626] shadow-red-100'
+                  : 'bg-[#3B82F6] hover:bg-[#2563EB] shadow-blue-100'
+              }`}
+            >
+              Submit {itemType === 'lost' ? 'Lost' : 'Found'} Item Report
+            </Button>
+          </div>
         </form>
       </div>
     </div>

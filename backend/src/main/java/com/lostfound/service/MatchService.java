@@ -73,13 +73,33 @@ public class MatchService {
                     } catch (Exception e) {
                         e.printStackTrace();
                         // Fallback strictly to text matching if AI crashes
-                        isMatch = lost.getItemName() != null && found.getItemName() != null &&
+                        boolean nameMatch = lost.getItemName() != null && found.getItemName() != null &&
                                   lost.getItemName().trim().equalsIgnoreCase(found.getItemName().trim());
+                        boolean categoryMatch = lost.getCategory() != null && found.getCategory() != null &&
+                                  lost.getCategory().equalsIgnoreCase(found.getCategory());
+                        
+                        if (nameMatch && categoryMatch) {
+                            isMatch = true;
+                            confidenceScore = 0.75; // 75% for strong text match
+                        } else if (nameMatch) {
+                            isMatch = true;
+                            confidenceScore = 0.55; // 55% for weak text match
+                        }
                     }
                 } else {
                     // Fallback to text matching if images are missing
-                    isMatch = lost.getItemName() != null && found.getItemName() != null &&
+                    boolean nameMatch = lost.getItemName() != null && found.getItemName() != null &&
                               lost.getItemName().trim().equalsIgnoreCase(found.getItemName().trim());
+                    boolean categoryMatch = lost.getCategory() != null && found.getCategory() != null &&
+                              lost.getCategory().equalsIgnoreCase(found.getCategory());
+                    
+                    if (nameMatch && categoryMatch) {
+                        isMatch = true;
+                        confidenceScore = 0.75; // 75% for strong text match
+                    } else if (nameMatch) {
+                        isMatch = true;
+                        confidenceScore = 0.55; // 55% for weak text match
+                    }
                 }
 
                 if (isMatch && !matchRepo.existsByLostItemAndFoundItem(lost, found)) {
@@ -88,7 +108,8 @@ public class MatchService {
                     match.setLostItem(lost);
                     match.setFoundItem(found);
                     match.setStatus("MATCHED");
-                    match.setConfidenceScore(confidenceScore > 0 ? confidenceScore : 0.90);
+                    // Use the newly calculated fallback score, or default to 0.50 if something goes wrong
+                    match.setConfidenceScore(confidenceScore > 0 ? confidenceScore : 0.50);
 
                     matches.add(matchRepo.save(match));
 
@@ -102,5 +123,22 @@ public class MatchService {
         }
         return matchRepo.findAll();
     }
+    public void deleteMatch(Long id) {
+        Match match = matchRepo.findById(id).orElse(null);
+        if (match != null) {
+            LostItem lost = match.getLostItem();
+            FoundItem found = match.getFoundItem();
+            if (lost != null) {
+                lost.setStatus("PENDING");
+                lostRepo.save(lost);
+            }
+            if (found != null) {
+                found.setStatus("PENDING");
+                foundRepo.save(found);
+            }
+            matchRepo.delete(match);
+        }
+    }
 }
+
 

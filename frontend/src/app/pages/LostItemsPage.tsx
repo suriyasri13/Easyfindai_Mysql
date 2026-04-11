@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Calendar, MapPin, User, Phone } from "lucide-react";
+import { Calendar, MapPin, User, Phone, Trash2 } from "lucide-react";
 import { Package } from "lucide-react";
-import { getLostItems } from "../services/api";
+import { getLostItems, deleteLostItem } from "../services/api";
+import { toast } from "sonner";
 
 interface Item {
   id: string;
@@ -16,40 +17,54 @@ interface Item {
   location: string;
   image: string | null;
   createdAt: string;
+  status: string;
 }
 
 export default function LostItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
-  fetchLostItems();
-}, []);
+    fetchLostItems();
+  }, []);
 
-const fetchLostItems = async () => {
-  try {
-    const data = await getLostItems();
+  const fetchLostItems = async () => {
+    try {
+      const data = await getLostItems();
 
-    const mappedData = data.map((item: any) => ({
-      id: item.itemId,
-      itemName: item.itemName,
-      category: item.category || "Other",
-      description: item.description || "",
-      contactInfo: item.user?.email || "",
-      date: item.dateLost,
-      location: item.location,
-      image: item.imagePath ? `http://localhost:8080/uploads/${item.imagePath}` : null,
-      userName: item.user?.name || "Unknown",
-      userId: item.user?.userId || "",
-      type: "lost",
-      createdAt: ""
-    }));
+      const mappedData = data.map((item: any) => ({
+        id: item.itemId,
+        itemName: item.itemName,
+        category: item.category || "Other",
+        description: item.description || "",
+        contactInfo: item.user?.email || "",
+        date: item.dateLost,
+        location: item.location,
+        image: item.imagePath ? `http://localhost:8080/uploads/${item.imagePath}` : null,
+        userName: item.user?.name || "Unknown",
+        userId: item.user?.userId || "",
+        type: "lost",
+        createdAt: "",
+        status: item.status || "PENDING"
+      }));
 
-    setItems(mappedData);
+      setItems(mappedData);
 
-  } catch (error) {
-    console.error("Error fetching lost items:", error);
-  }
-};
+    } catch (error) {
+      console.error("Error fetching lost items:", error);
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    if (window.confirm("Are you sure you want to clear this item?")) {
+      try {
+        await deleteLostItem(id);
+        toast.success("Item cleared successfully");
+        fetchLostItems();
+      } catch (error: any) {
+        toast.error(error.message || "Failed to clear item");
+      }
+    }
+  };
 
   return (
     <div>
@@ -80,8 +95,24 @@ const fetchLostItems = async () => {
           {items.map((item) => (
             <div
               key={item.id}
-              className="bg-gradient-to-br from-[#FCA5A5]/20 to-white rounded-xl shadow-lg p-5 border-2 border-[#FCA5A5] hover:shadow-xl transition-all"
+              className={`bg-gradient-to-br from-[#FCA5A5]/20 to-white rounded-xl shadow-lg p-5 border-2 hover:shadow-xl transition-all relative group overflow-hidden ${item.status === "MATCHED" ? "border-green-400 opacity-90" : "border-[#FCA5A5]"}`}
             >
+              {item.status === "MATCHED" && (
+                <div className="absolute top-4 right-[-35px] bg-green-500 text-white text-xs font-bold px-10 py-1 rotate-45 shadow-md z-20">
+                  MATCH FOUND
+                </div>
+              )}
+
+              {item.status !== "MATCHED" && (
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-red-500 hover:text-white text-red-500 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-10"
+                  title="Clear Item"
+                >
+                  <Trash2 size={18} />
+                </button>
+              )}
+
               {item.image && (
                 <img
                   src={item.image}
@@ -89,7 +120,7 @@ const fetchLostItems = async () => {
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
               )}
-              <div className="mb-3">
+              <div className="mb-3 flex items-center gap-2">
                 <span className="px-3 py-1 bg-[#FCA5A5] text-gray-800 text-sm rounded-full font-semibold">
                   LOST
                 </span>
@@ -121,7 +152,7 @@ const fetchLostItems = async () => {
                     className="text-red-500"
                   />
                   <span className="text-gray-700 text-sm">
-                    {new Date(item.date).toLocaleDateString()}
+                    {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

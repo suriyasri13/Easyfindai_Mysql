@@ -63,4 +63,16 @@ public class MatchController {
     	    if (foundFile != null) foundFile.delete();
     	}
     }
+
+    // 3️⃣ NEW delete match endpoint
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMatch(@PathVariable Long id) {
+        try {
+            matchService.deleteMatch(id);
+            return ResponseEntity.ok("Match deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error deleting match: " + e.getMessage());
+        }
+    }
 }
+

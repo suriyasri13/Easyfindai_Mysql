@@ -43,11 +43,14 @@ public class UserService {
     }
 
     public Optional<User> login(String email, String password) {
-
         Optional<User> user = userRepository.findByEmail(email);
 
-        if (user.isPresent() && encoder.matches(password, user.get().getPassword())) {
-            return user;
+        if (user.isPresent()) {
+            boolean matches = encoder.matches(password, user.get().getPassword());
+            
+            if (matches) {
+                return user;
+            }
         }
 
         return Optional.empty();

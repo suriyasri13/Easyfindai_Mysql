@@ -7,11 +7,21 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import com.lostfound.repository.MatchRepository;
+import com.lostfound.repository.ClaimRepository;
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class FoundItemService {
 
     @Autowired
     private FoundItemRepository foundItemRepository;
+
+    @Autowired
+    private MatchRepository matchRepository;
+
+    @Autowired
+    private ClaimRepository claimRepository;
 
     public FoundItem save(FoundItem item) {
         return foundItemRepository.save(item);
@@ -19,5 +29,12 @@ public class FoundItemService {
 
     public List<FoundItem> getAll() {
         return foundItemRepository.findAll();
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        matchRepository.deleteByFoundItemItemId(id);
+        claimRepository.deleteByFoundItemItemId(id);
+        foundItemRepository.deleteById(id);
     }
 }

@@ -124,6 +124,26 @@ public class ItemController {
         return foundItemService.getAll();
     }
 
+    @DeleteMapping("/lost-items/{id}")
+    public ResponseEntity<?> deleteLostItem(@PathVariable Long id) {
+        try {
+            lostItemService.deleteLostItem(id);
+            return ResponseEntity.ok("Lost item deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error deleting lost item: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/found-items/{id}")
+    public ResponseEntity<?> deleteFoundItem(@PathVariable Long id) {
+        try {
+            foundItemService.delete(id);
+            return ResponseEntity.ok("Found item deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error deleting found item: " + e.getMessage());
+        }
+    }
+
     // ---------------- HELPERS ----------------
 
     private String saveImage(MultipartFile image) throws Exception {

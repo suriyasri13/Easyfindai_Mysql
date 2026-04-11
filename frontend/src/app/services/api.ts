@@ -13,6 +13,17 @@ export const getMatches = async () => {
     matchDate: new Date().toISOString()
   }));
 };
+
+export const deleteMatch = async (id: string | number) => {
+  const response = await fetch(`${BASE_URL}/match/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete match: ${response.status}`);
+  }
+  return response.text();
+};
+
 export const getLostItems = async () => {
   const response = await fetch(`${BASE_URL}/lost-items`);
   return response.json();
@@ -23,13 +34,38 @@ export const getFoundItems = async () => {
   return response.json();
 };
 
+export const deleteLostItem = async (id: string | number) => {
+  const response = await fetch(`${BASE_URL}/lost-items/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete lost item: ${response.status}`);
+  }
+  return response.text();
+};
+
+export const deleteFoundItem = async (id: string | number) => {
+  const response = await fetch(`${BASE_URL}/found-items/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete found item: ${response.status}`);
+  }
+  return response.text();
+};
+
 export const registerUser = async (data: any) => {
   const response = await fetch(`${BASE_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  return response.json();
+
+  const result = await response.json();
+  if (result.status !== "success") {
+    throw new Error(result.message || "Registration failed");
+  }
+  return result;
 };
 
 export const loginUser = async (data: any) => {

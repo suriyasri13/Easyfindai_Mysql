@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { MessageSquare, CheckCircle } from 'lucide-react';
+import { MessageSquare, CheckCircle, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PersonalMatchChat from '../components/PersonalMatchChat';
-import { getMatches } from "../services/api";
+import { getMatches, deleteMatch } from "../services/api";
+import { toast } from "sonner";
+
 interface Item {
   id: string;
   userId: string;
@@ -45,6 +47,18 @@ const fetchMatches = async () => {
   }
 };
 
+const handleDeleteMatch = async (id: string) => {
+  if (window.confirm("Are you sure you want to clear this match? The items will become pending again.")) {
+    try {
+      await deleteMatch(id);
+      toast.success("Match cleared successfully");
+      fetchMatches();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to clear match");
+    }
+  }
+};
+
   const openChat = (match: Match) => {
     setSelectedMatch(match);
     setIsChatOpen(true);
@@ -71,9 +85,21 @@ const fetchMatches = async () => {
           {matches.map((match) => (
             <div
               key={match.id}
-              className="bg-gradient-to-r from-[#86EFAC]/20 to-white rounded-xl shadow-lg p-6 border-2 border-[#86EFAC]"
+              className="bg-gradient-to-r from-[#86EFAC]/20 to-white rounded-xl shadow-lg p-6 border-2 border-[#86EFAC] relative group overflow-hidden"
             >
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+              <div className="absolute top-4 right-[-40px] bg-green-500 text-white text-xs font-bold px-12 py-1.5 rotate-45 shadow-md z-20">
+                AI MATCH
+              </div>
+
+              <button
+                onClick={() => handleDeleteMatch(match.id)}
+                className="absolute top-2 right-12 p-2 bg-white hover:bg-red-500 hover:text-white text-red-500 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100 z-30"
+                title="Clear Match"
+              >
+                <Trash2 size={18} />
+              </button>
+
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-4 mt-2 pr-16">
                 <div className="flex items-center gap-4">
                   <CheckCircle className="text-[#16A34A]" size={28} />
                   <div>
