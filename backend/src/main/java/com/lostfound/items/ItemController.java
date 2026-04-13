@@ -40,6 +40,9 @@ public class ItemController {
             @RequestParam("dateLost") String dateLost,
             @RequestParam("location") String location,
             @RequestParam("userId") Long userId,
+            @RequestParam(value = "isConfidential", defaultValue = "false") boolean isConfidential,
+            @RequestParam(value = "uniqueIdentifier", required = false) String uniqueIdentifier,
+            @RequestParam(value = "hiddenDetail", required = false) String hiddenDetail,
             @RequestParam(value = "image", required = false) MultipartFile image
     ) {
         try {
@@ -49,7 +52,14 @@ public class ItemController {
             item.setDescription(description);
             item.setContactInfo(contactInfo);
             item.setLocation(location);
-            item.setDateLost(LocalDate.parse(dateLost));
+            if (dateLost == null || dateLost.trim().isEmpty()) {
+                item.setDateLost(LocalDate.now());
+            } else {
+                item.setDateLost(LocalDate.parse(dateLost));
+            }
+            item.setConfidential(isConfidential);
+            item.setUniqueIdentifier(uniqueIdentifier);
+            item.setHiddenDetail(hiddenDetail);
 
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
@@ -60,7 +70,18 @@ public class ItemController {
                 item.setImagePath(fileName);
             }
 
-            return ResponseEntity.ok(lostItemService.saveLostItem(item));
+            LostItem savedItem = lostItemService.saveLostItem(item);
+            System.out.println("Backend: SUCCESS saving Lost Item Id: " + savedItem.getItemId());
+
+            // --- AUTOMATED MATCHING HOOK ---
+            try {
+                matchService.processNewLostItem(savedItem);
+                System.out.println("AI: Successfully ran proactive matching scan for LOST item: " + itemName);
+            } catch (Exception e) {
+                System.err.println("AI: Proactive scan failed (but item was saved): " + e.getMessage());
+            }
+
+            return ResponseEntity.ok(savedItem);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error saving lost item: " + e.getMessage());
@@ -74,6 +95,9 @@ public class ItemController {
 
     // ---------------- FOUND ITEMS ----------------
 
+    @Autowired
+    private com.lostfound.service.MatchService matchService;
+
     @PostMapping(value = "/found-items", consumes = "multipart/form-data")
     public ResponseEntity<?> addFoundItemMultipart(
             @RequestParam("itemName") String itemName,
@@ -83,6 +107,9 @@ public class ItemController {
             @RequestParam("dateLost") String dateLost, // using same param name from frontend
             @RequestParam("location") String location,
             @RequestParam("userId") Long userId,
+            @RequestParam(value = "isConfidential", defaultValue = "false") boolean isConfidential,
+            @RequestParam(value = "uniqueIdentifier", required = false) String uniqueIdentifier,
+            @RequestParam(value = "hiddenDetail", required = false) String hiddenDetail,
             @RequestParam(value = "image", required = false) MultipartFile image
     ) {
         try {
@@ -100,6 +127,9 @@ public class ItemController {
                 item.setDateFound(LocalDate.parse(dateLost));
             }
             item.setStatus("PENDING");
+            item.setConfidential(isConfidential);
+            item.setUniqueIdentifier(uniqueIdentifier);
+            item.setHiddenDetail(hiddenDetail);
 
             User finder = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found: " + userId));
@@ -112,7 +142,17 @@ public class ItemController {
 
             FoundItem savedItem = foundItemService.save(item);
             System.out.println("Backend: SUCCESS saving Found Item Id: " + savedItem.getItemId());
+            
+            // --- AUTOMATED MATCHING HOOK ---
+            try {
+                matchService.processNewFoundItem(savedItem);
+                System.out.println("AI: Successfully ran proactive matching scan for item: " + itemName);
+            } catch (Exception e) {
+                System.err.println("AI: Proactive scan failed (but item was saved): " + e.getMessage());
+            }
+
             return ResponseEntity.ok(savedItem);
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error saving found item: " + e.getMessage());
@@ -147,7 +187,7 @@ public class ItemController {
     // ---------------- HELPERS ----------------
 
     private String saveImage(MultipartFile image) throws Exception {
-        String uploadDir = "C:/Users/HP/OneDrive/Desktop/smart-lost-found-system-main/backend/uploads/";
+        String uploadDir = "C:/Users/HP/OneDrive/Desktop/smart-lost-found-system-main - Copy/backend/uploads/";
         File uploadFolder = new File(uploadDir);
         if (!uploadFolder.exists()) {
             uploadFolder.mkdirs();

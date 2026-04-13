@@ -5,8 +5,8 @@ import os
 # Add parent directory to path so that utils can be imported
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.feature_extractor import extract_features
-from utils.matcher import match_items, text_similarity
+from utils.feature_extractor import extract_image_features
+from utils.matcher import match_image_features, deep_text_similarity
 
 app = Flask(__name__)
 
@@ -31,21 +31,29 @@ def match_ai():
     lost_image.save(lost_path)
     found_image.save(found_path)
 
-    # Image similarity
-    lost_features = extract_features(lost_path)
-    found_features = extract_features(found_path)
-    image_score = match_items(lost_features, found_features)
+    # Deep Image similarity
+    lost_features = extract_image_features(lost_path)
+    found_features = extract_image_features(found_path)
+    image_score = match_image_features(lost_features, found_features)
 
-    # Text similarity
-    text_score = text_similarity(lost_description, found_description)
+    # Deep Semantic Text similarity
+    text_score = deep_text_similarity(lost_description, found_description)
 
     # Hybrid scoring
-    final_score = round((0.7 * image_score + 0.3 * text_score), 2)
+    # We now trust the max of the two OR the weighted average to increase sensitivity
+    final_score = round((0.5 * image_score + 0.5 * text_score), 2)
+    
+    # Boost: If descriptions are highly similar, ensure it's at least a medium match
+    if text_score > 0.8:
+        final_score = max(final_score, 0.7)
 
-    if final_score > 0.8:
-        status = "High Confidence Match"
-    elif final_score > 0.5:
-        status = "Medium Confidence"
+    print(f"DEBUG AI: Comparing '{lost_description}' VS '{found_description}'")
+    print(f"DEBUG AI: -> Image: {image_score}, Text: {text_score}, Final: {final_score}")
+
+    if final_score > 0.85:
+        status = "High Confidence"
+    elif final_score > 0.50:
+        status = "Potential Match"
     else:
         status = "Low Confidence"
 
@@ -56,5 +64,34 @@ def match_ai():
         "status": status
     })
 
+from utils.chat_engine import get_smart_response
+
+@app.route("/chat", methods=["POST"])
+def semantic_chat():
+    data = request.get_json()
+    if not data or "query" not in data:
+        return jsonify({"error": "Missing 'query' field"}), 400
+        
+    user_query = data["query"]
+    response_text = get_smart_response(user_query)
+    
+    return jsonify({
+        "response": response_text
+    })
+
+from utils.moderator import generate_security_script
+
+@app.route("/moderate", methods=["POST"])
+def moderate_chat():
+    data = request.get_json()
+    lost_desc = data.get("lost_desc", "")
+    found_desc = data.get("found_desc", "")
+    
+    bot_message = generate_security_script(lost_desc, found_desc)
+    
+    return jsonify({
+        "message": bot_message
+    })
+
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(port=5000, host='0.0.0.0', debug=True)

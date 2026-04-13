@@ -22,6 +22,9 @@ public class Match {
 
     private String status; // MATCHED / PENDING / REJECTED
 
+    @Column(length = 500)
+    private String matchReason;
+
     // Getters & Setters
     public Long getMatchId() {
         return matchId;
@@ -29,6 +32,14 @@ public class Match {
 
     public void setMatchId(Long matchId) {
         this.matchId = matchId;
+    }
+
+    public String getMatchReason() {
+        return matchReason;
+    }
+
+    public void setMatchReason(String matchReason) {
+        this.matchReason = matchReason;
     }
 
     public LostItem getLostItem() {

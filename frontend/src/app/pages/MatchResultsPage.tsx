@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { MessageSquare, CheckCircle, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PersonalMatchChat from '../components/PersonalMatchChat';
-import { getMatches, deleteMatch } from "../services/api";
+import { getMatches, deleteMatch, confirmMatch } from "../services/api";
 import { toast } from "sonner";
 
 interface Item {
@@ -22,6 +22,7 @@ interface Item {
 
 interface Match {
   id: string;
+  status: string;
   lostItem: Item;
   foundItem: Item;
   confidence: number;
@@ -35,42 +36,75 @@ export default function MatchResultsPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
-  fetchMatches();
-}, []);
+    fetchMatches();
+  }, []);
 
-const fetchMatches = async () => {
-  try {
-    const data = await getMatches();
-    setMatches(data);
-  } catch (error) {
-    console.error("Error fetching matches:", error);
-  }
-};
-
-const handleDeleteMatch = async (id: string) => {
-  if (window.confirm("Are you sure you want to clear this match? The items will become pending again.")) {
+  const fetchMatches = async () => {
     try {
-      await deleteMatch(id);
-      toast.success("Match cleared successfully");
-      fetchMatches();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to clear match");
+      const data = await getMatches();
+      setMatches(data);
+    } catch (error) {
+      console.error("Error fetching matches:", error);
     }
-  }
-};
+  };
+
+  const handleConfirmMatch = async (id: string) => {
+    if (window.confirm("Is the physical item successfully returned to its owner? This will publicly mark the items as MATCH FOUND!")) {
+      try {
+        await confirmMatch(id);
+        toast.success("Item Marked as Recovered!");
+        fetchMatches();
+      } catch (error: any) {
+        toast.error(error.message || "Failed to confirm match");
+      }
+    }
+  };
+
+  const handleDeleteMatch = async (id: string) => {
+    if (window.confirm("Are you sure you want to clear this match? The items will become pending again.")) {
+      try {
+        await deleteMatch(id);
+        toast.success("Match cleared successfully");
+        fetchMatches();
+      } catch (error: any) {
+        toast.error(error.message || "Failed to clear match");
+      }
+    }
+  };
 
   const openChat = (match: Match) => {
     setSelectedMatch(match);
     setIsChatOpen(true);
   };
 
+  const handleClearAll = async () => {
+    if (matches.length === 0) return;
+    if (window.confirm("Are you sure you want to clear ALL matches? The items will become pending again.")) {
+      try {
+        await Promise.all(matches.map(match => deleteMatch(match.id)));
+        toast.success("All matches cleared successfully");
+        fetchMatches();
+      } catch (error: any) {
+        toast.error("Failed to clear some matches");
+        fetchMatches();
+      }
+    }
+  };
+
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-3xl text-[#1E2A44] font-semibold">Match Results</h2>
-        <p className="text-gray-600 mt-2 text-base">
-          Potential matches between lost and found items
-        </p>
+      <div className="mb-8 flex justify-between items-end">
+        <div>
+          <h2 className="text-3xl text-[#1E2A44] font-semibold">Match Results</h2>
+          <p className="text-gray-600 mt-2 text-base">
+            Potential matches between lost and found items
+          </p>
+        </div>
+        {matches.length > 0 && (
+          <button onClick={handleClearAll} className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-semibold flex items-center gap-2 transition-colors mb-2">
+            <Trash2 size={18} /> Clear All
+          </button>
+        )}
       </div>
 
       {matches.length === 0 ? (
@@ -85,11 +119,17 @@ const handleDeleteMatch = async (id: string) => {
           {matches.map((match) => (
             <div
               key={match.id}
-              className="bg-gradient-to-r from-[#86EFAC]/20 to-white rounded-xl shadow-lg p-6 border-2 border-[#86EFAC] relative group overflow-hidden"
+              className={`bg-gradient-to-r from-[#86EFAC]/20 to-white rounded-xl shadow-lg p-6 border-2 relative group overflow-hidden ${match.status === 'RESOLVED' ? 'border-yellow-400' : 'border-[#86EFAC]'}`}
             >
-              <div className="absolute top-4 right-[-40px] bg-green-500 text-white text-xs font-bold px-12 py-1.5 rotate-45 shadow-md z-20">
-                AI MATCH
-              </div>
+              {match.status === 'RESOLVED' ? (
+                <div className="absolute top-4 right-[-45px] bg-yellow-500 text-white text-xs font-bold px-12 py-1.5 rotate-45 shadow-md z-20">
+                  RECOVERED
+                </div>
+              ) : (
+                <div className="absolute top-4 right-[-40px] bg-green-500 text-white text-xs font-bold px-12 py-1.5 rotate-45 shadow-md z-20">
+                  AI MATCH
+                </div>
+              )}
 
               <button
                 onClick={() => handleDeleteMatch(match.id)}
@@ -103,7 +143,7 @@ const handleDeleteMatch = async (id: string) => {
                 <div className="flex items-center gap-4">
                   <CheckCircle className="text-[#16A34A]" size={28} />
                   <div>
-                    <h3 className="text-xl text-[#1E2A44] font-semibold">Match Found!</h3>
+                    <h3 className="text-xl text-[#1E2A44] font-semibold">{match.status === 'RESOLVED' ? 'Item Returned to Owner!' : 'Match Found!'}</h3>
                     <p className="text-sm text-gray-600">
                       Matched on {new Date(match.matchDate).toLocaleDateString()}
                     </p>
@@ -128,12 +168,12 @@ const handleDeleteMatch = async (id: string) => {
                           stroke="#16A34A"
                           strokeWidth="6"
                           fill="none"
-                          strokeDasharray={`${(match.confidence / 100) * 175.93} 175.93`}
+                          strokeDasharray={`${Math.round((match.confidence / 100) * 175.93)} 175.93`}
                           strokeLinecap="round"
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-base font-bold text-[#16A34A]">{match.confidence}%</span>
+                        <span className="text-base font-bold text-[#16A34A]">{Math.round(match.confidence)}%</span>
                       </div>
                     </div>
                     <div>
@@ -143,13 +183,25 @@ const handleDeleteMatch = async (id: string) => {
                   </div>
                 </div>
                 
-                <Button
-                  onClick={() => openChat(match)}
-                  className="bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium text-base px-6"
-                >
-                  <MessageSquare size={18} className="mr-2" />
-                  Start Chat
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => openChat(match)}
+                    className="bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium text-base px-6"
+                  >
+                    <MessageSquare size={18} className="mr-2" />
+                    Start Chat
+                  </Button>
+                  
+                  {match.status !== 'RESOLVED' && (
+                    <Button
+                      onClick={() => handleConfirmMatch(match.id)}
+                      className="bg-green-600 hover:bg-green-700 text-white font-medium text-base px-6"
+                    >
+                      <CheckCircle size={18} className="mr-2" />
+                      Confirm Return
+                    </Button>
+                  )}
+                </div>
               </div>
 
               <div className="mb-4">

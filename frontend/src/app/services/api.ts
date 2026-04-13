@@ -6,12 +6,33 @@ export const getMatches = async () => {
 
   return data.map((match: any) => ({
     id: match.matchId,                     // backend → frontend
-    lostItem: match.lostItem,
-    foundItem: match.foundItem,
+    lostItem: {
+      ...match.lostItem,
+      date: match.lostItem.dateLost,
+      userName: match.lostItem.user?.name || "Owner",
+      userId: match.lostItem.user?.userId || match.lostItem.userId
+    },
+    foundItem: {
+      ...match.foundItem,
+      date: match.foundItem.dateFound,
+      userName: match.foundItem.finder?.name || "Finder",
+      userId: match.foundItem.finder?.userId || match.foundItem.userId
+    },
     confidence: match.confidenceScore * 100, // convert 0.9 → 90%
-    matchReason: ["Item name match", "Location match"],
-    matchDate: new Date().toISOString()
+    matchReason: match.matchReason ? match.matchReason.split(', ') : ["AI visual & text similarity"],
+    matchDate: new Date().toISOString(),
+    status: match.status
   }));
+};
+
+export const confirmMatch = async (id: string | number) => {
+  const response = await fetch(`${BASE_URL}/match/confirm/${id}`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to confirm match: ${response.status}`);
+  }
+  return response.text();
 };
 
 export const deleteMatch = async (id: string | number) => {
@@ -23,6 +44,86 @@ export const deleteMatch = async (id: string | number) => {
   }
   return response.text();
 };
+
+// --- CHAT SYSTEM ---
+export interface ChatMessage {
+  id?: number;
+  matchId: number | string;
+  senderId: number | string;
+  content: string;
+  timestamp?: string;
+}
+
+export const getChatMessages = async (matchId: string | number): Promise<ChatMessage[]> => {
+  const response = await fetch(`${BASE_URL}/chat/${matchId}`);
+  if (!response.ok) throw new Error("Failed to fetch messages");
+  return response.json();
+};
+
+export const sendChatMessage = async (message: ChatMessage): Promise<ChatMessage> => {
+  const response = await fetch(`${BASE_URL}/chat/send`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(message),
+  });
+  if (!response.ok) throw new Error("Failed to send message");
+  return response.json();
+};
+
+// --- NOTIFICATION SYSTEM ---
+export interface Notification {
+  id: number;
+  recipientId: number;
+  title: string;
+  message: string;
+  type: string;
+  matchId: number;
+  actionUrl?: string;
+  actionText?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export const getNotifications = async (userId: string | number): Promise<Notification[]> => {
+  const response = await fetch(`${BASE_URL}/notifications/${userId}`);
+  if (!response.ok) throw new Error("Failed to fetch notifications");
+  return response.json();
+};
+
+export const getUnreadNotificationCount = async (userId: string | number): Promise<number> => {
+  const response = await fetch(`${BASE_URL}/notifications/${userId}/unread-count`);
+  if (!response.ok) throw new Error("Failed to fetch count");
+  return response.json();
+};
+
+export const getGlobalNotifications = async (): Promise<Notification[]> => {
+  const response = await fetch(`${BASE_URL}/notifications/global`);
+  if (!response.ok) throw new Error("Failed to fetch global notifications");
+  return response.json();
+};
+
+export const markNotificationAsRead = async (notificationId: number): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/notifications/${notificationId}/read`, {
+    method: "POST",
+  });
+  if (!response.ok) throw new Error("Failed to mark notification as read");
+};
+
+export const deleteNotification = async (notificationId: number): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/notifications/${notificationId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to delete notification");
+};
+
+export const clearAllNotifications = async (userId: string | number): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/notifications/user/${userId}/clear-all`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to clear all notifications");
+};
+
+
 
 export const getLostItems = async () => {
   const response = await fetch(`${BASE_URL}/lost-items`);
@@ -164,4 +265,14 @@ export const resetPassword = async (token: string, newPassword: string) => {
     throw new Error(result.message || "Failed to reset password");
   }
   return result;
+};
+
+export const askChatBot = async (query: string): Promise<{ response: string }> => {
+  const response = await fetch(`${BASE_URL}/chatbot/ask`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  if (!response.ok) throw new Error("Failed to get AI response");
+  return response.json();
 };

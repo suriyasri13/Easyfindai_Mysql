@@ -1,7 +1,9 @@
-import { X, Send } from 'lucide-react';
-import { useState } from 'react';
+import { X, Send, Bot, User } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+
+import { askChatBot } from '../services/api';
 
 interface AIChatPanelProps {
   isOpen: boolean;
@@ -13,122 +15,131 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
     { text: 'Hello! I\'m your AI assistant for EaseFind.ai. How can I help you today?', isUser: false }
   ]);
   const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const getAIResponse = (userMessage: string): string => {
-    const msg = userMessage.toLowerCase();
-    
-    // Report Lost Item
-    if (msg.includes('report') && (msg.includes('lost') || msg.includes('lose'))) {
-      return 'To report a lost item:\n1. Click "Report Item" in the top navigation\n2. Select "Report Lost Item"\n3. Fill in details: item name, category, description\n4. Add contact information\n5. Enable location or enter last known location\n6. Upload a photo (optional)\n7. Click "Submit Lost Item Report"\n\nYour item will be automatically matched with found items!';
-    }
-    
-    // Report Found Item
-    if (msg.includes('report') && msg.includes('found')) {
-      return 'To report a found item:\n1. Click "Report Item" in the top navigation\n2. Select "Report Found Item"\n3. Fill in details: item name, category, description\n4. Add your contact information\n5. Enter current storage location\n6. Upload a photo (optional)\n7. Click "Submit Found Item Report"\n\nThe system will match it with lost items automatically!';
-    }
-    
-    // Matching
-    if (msg.includes('match') || msg.includes('how does') || msg.includes('work')) {
-      return 'Our AI matching system works by:\n1. Analyzing item categories\n2. Comparing item names and descriptions\n3. Matching keywords and attributes\n4. Calculating confidence scores\n\nWhen a match is found (40%+ confidence), you\'ll see it in "Match Results" and receive a notification. You can then start a personal chat with the matched user!';
-    }
-    
-    // Claim Process
-    if (msg.includes('claim') || msg.includes('get back') || msg.includes('retrieve')) {
-      return 'To claim your item:\n1. Go to "Match Results" page\n2. Find your matched item\n3. Click "Start Chat" button\n4. Coordinate with the finder\n5. Arrange a safe meetup location\n6. Verify the item details\n7. Collect your item!\n\nAlways meet in public places for safety.';
-    }
-    
-    // Location
-    if (msg.includes('location') || msg.includes('gps')) {
-      return 'Location features:\n• Click "Enable Current Location" to auto-fill GPS coordinates\n• Your browser will ask for permission\n• For lost items: provides last known location\n• For found items: where the item is currently stored\n\nThis helps match items in your area!';
-    }
-    
-    // Chat
-    if (msg.includes('chat') || msg.includes('message') || msg.includes('contact')) {
-      return 'Personal Chat is available only for matched items:\n1. Go to "Match Results"\n2. Find a confirmed match\n3. Click "Start Chat"\n4. Communicate directly with the other user\n5. Arrange item return\n\nChat is private and secure between matched users only.';
-    }
-    
-    // Upload/Image
-    if (msg.includes('upload') || msg.includes('image') || msg.includes('photo')) {
-      return 'Image upload guidelines:\n• Supported formats: JPG, PNG\n• Maximum size: 5MB\n• Clear, well-lit photos work best\n• Multiple angles help matching\n• Images improve match accuracy\n\nClick the upload area in the report form to select your image.';
-    }
-    
-    // Contact/Help
-    if (msg.includes('help') || msg.includes('contact') || msg.includes('support')) {
-      return 'Need more help?\n📞 Phone: 7200076786\n📧 Email: support@easefind.ai\n📍 Address: No 12: 555 MCE Campus Road, Chennai\n⏰ Hours: Mon-Fri, 9:00 AM – 5:00 PM\n\nYou can also visit the Contact Us page from the sidebar!';
-    }
-    
-    // Default response
-    return 'I can help you with:\n• How to report lost/found items\n• Understanding the matching system\n• Claiming your items\n• Using the chat feature\n• Location services\n• Image uploads\n\nWhat would you like to know more about?';
-  };
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage = { text: input, isUser: true };
     setMessages(prev => [...prev, userMessage]);
     
-    // Get AI response
-    setTimeout(() => {
-      const aiResponse = getAIResponse(input);
+    // Clear input and trigger typing indicator immediately
+    const userQuery = input;
+    setInput('');
+    setIsTyping(true);
+    
+    try {
+      const data = await askChatBot(userQuery);
       setMessages(prev => [...prev, {
-        text: aiResponse,
+        text: data.response,
         isUser: false
       }]);
-    }, 500);
-
-    setInput('');
+    } catch (e) {
+      setMessages(prev => [...prev, {
+        text: "I'm having trouble connecting to my neural network right now. Please test your connection and try again!",
+        isUser: false
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-6 bottom-6 w-96 h-[500px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col border border-gray-200">
-      {/* Header */}
-      <div className="bg-[#1E2A44] text-white p-4 rounded-t-2xl flex items-center justify-between">
-        <h3 className="text-lg font-semibold">AI Chat Assistant</h3>
+    <div className="fixed right-6 bottom-6 w-[400px] h-[550px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 z-50 flex flex-col border border-gray-100 overflow-hidden transition-all transform duration-300">
+      
+      {/* Premium Header */}
+      <div className="bg-gradient-to-r from-[#1A2538] to-[#2D3E5F] text-white p-4 flex items-center justify-between border-b border-gray-700">
+        <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-br from-[#14B8A6] to-teal-600 p-2.5 rounded-full shadow-inner ring-2 ring-white/10">
+            <Bot size={22} className="text-white" />
+          </div>
+          <div>
+            <h3 className="text-[16px] font-bold tracking-wide">EaseFind.ai Assistant</h3>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+              <p className="text-[11px] font-semibold text-teal-100 uppercase tracking-wider">Online</p>
+            </div>
+          </div>
+        </div>
         <button
           onClick={onClose}
-          className="hover:bg-white/10 p-1 rounded transition-colors"
+          className="hover:bg-white/10 p-2 rounded-full transition-colors opacity-80 hover:opacity-100"
         >
           <X size={20} />
         </button>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-3">
+      {/* Messages Window */}
+      <div className="flex-1 p-5 overflow-y-auto space-y-5 bg-gradient-to-b from-gray-50/50 to-white">
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
+            className={`flex items-end gap-2.5 text-sm ${msg.isUser ? 'flex-row-reverse' : 'flex-row'}`}
           >
+            {/* Contextual Avatars */}
+            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-md ${
+              msg.isUser 
+                ? 'bg-gray-100 text-gray-500 border border-gray-200' 
+                : 'bg-gradient-to-br from-[#14B8A6] to-[#0D9488] text-white border border-teal-500/20'
+            }`}>
+              {msg.isUser ? <User size={16} /> : <Bot size={16} />}
+            </div>
+
+            {/* Asymmetrical Chat Bubbles */}
             <div
-              className={`max-w-[80%] p-3 rounded-lg whitespace-pre-line text-sm ${
+              className={`max-w-[78%] p-3.5 shadow-sm whitespace-pre-line leading-relaxed text-[14.5px] ${
                 msg.isUser
-                  ? 'bg-[#14B8A6] text-white'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bg-[#1E2A44] text-white rounded-2xl rounded-br-sm'
+                  : 'bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-bl-sm font-medium'
               }`}
             >
               {msg.text}
             </div>
           </div>
         ))}
+
+        {/* Real-time Typing Indicator */}
+        {isTyping && (
+          <div className="flex items-end gap-2.5 text-sm">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#14B8A6] to-[#0D9488] text-white flex items-center justify-center shadow-md">
+              <Bot size={16} />
+            </div>
+            <div className="bg-white border border-gray-100 text-gray-800 p-4 rounded-2xl rounded-bl-sm shadow-sm flex items-center gap-1.5 h-[46px]">
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce"></div>
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} className="h-2" />
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex gap-2">
+      {/* Input Area */}
+      <div className="p-4 bg-white border-t border-gray-100 pb-5">
+        <div className="flex items-center gap-2 bg-gray-50/80 p-1.5 rounded-full border-2 border-gray-100 focus-within:border-teal-400 focus-within:bg-white transition-all duration-300">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type your message..."
-            className="flex-1 border-2 border-gray-200 focus:border-[#14B8A6]"
+            placeholder="Ask me anything..."
+            className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 text-[15px] text-gray-700 placeholder:text-gray-400"
+            disabled={isTyping}
           />
           <Button
             onClick={handleSend}
-            className="bg-[#14B8A6] hover:bg-[#0F9B8E] text-white"
+            disabled={!input.trim() || isTyping}
+            className="bg-gradient-to-r from-[#14B8A6] to-[#0D9488] hover:from-[#0D9488] hover:to-[#0F766E] text-white rounded-full w-[42px] h-[42px] p-0 flex-shrink-0 transition-transform active:scale-95 shadow-md shadow-teal-500/20 disabled:opacity-50 disabled:shadow-none"
           >
-            <Send size={18} />
+            <Send size={18} className="translate-x-[1px]" />
           </Button>
         </div>
       </div>

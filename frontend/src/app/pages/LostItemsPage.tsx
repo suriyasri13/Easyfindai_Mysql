@@ -66,15 +66,36 @@ export default function LostItemsPage() {
     }
   };
 
+  const handleClearAll = async () => {
+    if (items.length === 0) return;
+    if (window.confirm("Are you sure you want to clear ALL lost items? This cannot be undone.")) {
+      try {
+        await Promise.all(items.map(item => deleteLostItem(item.id)));
+        toast.success("All items cleared successfully");
+        fetchLostItems();
+      } catch (error: any) {
+        toast.error("Failed to clear some items");
+        fetchLostItems();
+      }
+    }
+  };
+
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-4xl mb-6 text-[#1E2A44] font-bold">
-          Lost Items
-        </h2>
-        <p className="text-gray-600 text-base">
-          Browse recently reported lost items in your area
-        </p>
+      <div className="mb-8 flex justify-between items-end">
+        <div>
+          <h2 className="text-4xl mb-6 text-[#1E2A44] font-bold">
+            Lost Items
+          </h2>
+          <p className="text-gray-600 text-base">
+            Browse recently reported lost items in your area
+          </p>
+        </div>
+        {items.length > 0 && (
+          <button onClick={handleClearAll} className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-semibold flex items-center gap-2 transition-colors mb-2">
+            <Trash2 size={18} /> Clear All
+          </button>
+        )}
       </div>
 
       {items.length === 0 ? (
@@ -103,15 +124,13 @@ export default function LostItemsPage() {
                 </div>
               )}
 
-              {item.status !== "MATCHED" && (
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-red-500 hover:text-white text-red-500 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-10"
-                  title="Clear Item"
-                >
-                  <Trash2 size={18} />
-                </button>
-              )}
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="absolute top-4 left-4 p-2 bg-white/80 hover:bg-red-500 hover:text-white text-red-500 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-30"
+                title="Clear Item"
+              >
+                <Trash2 size={18} />
+              </button>
 
               {item.image && (
                 <img

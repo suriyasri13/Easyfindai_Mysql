@@ -180,6 +180,40 @@ export default function ReportItemPage() {
       return;
     }
 
+    if (!itemName) {
+      toast.error("Please provide the Item Name");
+      return;
+    }
+    if (!category) {
+      toast.error("Please select a Category");
+      return;
+    }
+    if (!description) {
+      toast.error("Please provide a Description");
+      return;
+    }
+    if (!contactInfo) {
+      toast.error("Please provide Contact Information");
+      return;
+    }
+    if (!date) {
+      toast.error(`Please select the Date ${itemType === 'lost' ? 'Lost' : 'Found'}`);
+      return;
+    }
+    if (itemType === 'lost' && !location) {
+      toast.error("Please provide the Last Known Location");
+      return;
+    }
+    if (itemType === 'found' && !storageLocation) {
+      toast.error("Please provide the Storage Location");
+      return;
+    }
+
+    if (isConfidential && !uniqueIdentifier) {
+      toast.error("Unique Identifier is required for confidential items");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("itemType", itemType);
     formData.append("userId", user.userId.toString());  
@@ -188,6 +222,11 @@ export default function ReportItemPage() {
     formData.append("description", description);
     formData.append("contactInfo", contactInfo);
     formData.append("dateLost", date);
+    formData.append("isConfidential", isConfidential.toString());
+    if (isConfidential) {
+      formData.append("uniqueIdentifier", uniqueIdentifier);
+      formData.append("hiddenDetail", hiddenDetail);
+    }
     
     const finalLocation = itemType === "found" 
       ? (storageLocation || location) 

@@ -15,7 +15,7 @@ import com.lostfound.service.AIService;
 
 @RestController
 @RequestMapping("/api/match")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*") // Align with ItemController
 public class MatchController {
 
     @Autowired
@@ -64,9 +64,20 @@ public class MatchController {
     	}
     }
 
-    // 3️⃣ NEW delete match endpoint
+    // 3️⃣ NEW confirm match endpoint
+    @PostMapping("/confirm/{id}")
+    public ResponseEntity<?> confirmMatch(@PathVariable("id") Long id) {
+        try {
+            matchService.confirmMatch(id);
+            return ResponseEntity.ok("Match confirmed successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error confirming match: " + e.getMessage());
+        }
+    }
+
+    // 4️⃣ delete match endpoint
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMatch(@PathVariable Long id) {
+    public ResponseEntity<?> deleteMatch(@PathVariable("id") Long id) {
         try {
             matchService.deleteMatch(id);
             return ResponseEntity.ok("Match deleted successfully");

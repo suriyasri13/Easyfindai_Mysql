@@ -4,4 +4,8 @@ opencv-python
 numpy
 scikit-learn
 gunicorn
+torch
+torchvision
+sentence-transformers
+Pillow
 

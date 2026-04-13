@@ -90,6 +90,18 @@
     <version>0.9.1</version>
 	</dependency>
 
+    <!-- Email Dependency -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+
+    <!-- WebSocket -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+
 </dependencies>
 
 

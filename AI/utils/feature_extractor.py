@@ -1,27 +1,44 @@
-import cv2
-import numpy as np
+import torch
+import torchvision.models as models
+import torchvision.transforms as transforms
+from PIL import Image
+from torch import nn
 
-def extract_features(image_path):
+# Global device and models
+device = torch.device('cpu') # Enforce CPU to save battery/prevent CUDA crashes if no GPU
+weights = models.MobileNet_V2_Weights.DEFAULT
+model = models.mobilenet_v2(weights=weights).to(device)
 
-    image = cv2.imread(image_path)
+# We want the features from before the classification head
+class FeatureExtractor(nn.Module):
+    def __init__(self, original_model):
+        super(FeatureExtractor, self).__init__()
+        self.features = original_model.features
+        self.pooling = nn.AdaptiveAvgPool2d((1, 1))
 
-    # Safety check
-    if image is None:
+    def forward(self, x):
+        x = self.features(x)
+        x = self.pooling(x)
+        return x.view(x.size(0), -1)
+
+extractor = FeatureExtractor(model).to(device)
+extractor.eval()
+
+preprocess = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+
+def extract_image_features(image_path):
+    print(f"Extracting visual features with MobileNetV2 for: {image_path}")
+    try:
+        img = Image.open(image_path).convert('RGB')
+        img_tensor = preprocess(img).unsqueeze(0).to(device)
+        with torch.no_grad():
+            features = extractor(img_tensor)
+        return features.cpu().numpy().flatten()
+    except Exception as e:
+        print(f"Error extracting visual features: {e}")
         return None
-
-    image = cv2.resize(image, (224,224))
-
-    # Optional but recommended
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    hist = cv2.calcHist(
-        [image],
-        [0,1,2],
-        None,
-        [8,8,8],
-        [0,256,0,256,0,256]
-    )
-
-    cv2.normalize(hist, hist)
-
-    return hist.flatten()

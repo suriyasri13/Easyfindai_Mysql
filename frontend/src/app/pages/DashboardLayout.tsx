@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router';
 import { 
   LayoutDashboard, 
@@ -10,7 +10,16 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import { 
+  getUnreadNotificationCount, 
+  getGlobalNotifications, 
+  getNotifications, 
+  markNotificationAsRead 
+} from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'sonner';
 import AIChatPanel from '../components/AIChatPanel';
 
 export default function DashboardLayout() {
@@ -19,14 +28,80 @@ export default function DashboardLayout() {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const prevCountRef = useRef(0);
+  const lastGlobalIdRef = useRef<number>(0);
 
   useEffect(() => {
     if (!user) {
       navigate('/');
+      return;
     }
+
+    // 1. Initial fetch for unread count
+    fetchInitialUnreadCount();
+
+    // 2. Initialize WebSocket STOMP client
+    const socket = new SockJS('http://localhost:8080/ws');
+    const stompClient = new Client({
+      webSocketFactory: () => socket as any,
+      reconnectDelay: 5000,
+      onConnect: () => {
+        console.log('Connected to WebSocket successfully');
+
+        // Subscribe to private (user-specific) notifications
+        stompClient.subscribe(`/topic/user_${user.userId}`, (message) => {
+          const notification = JSON.parse(message.body);
+          setUnreadCount((prev) => prev + 1);
+          
+          toast(notification.title, {
+            description: notification.message,
+            action: notification.actionUrl ? {
+              label: notification.actionText || 'View',
+              onClick: () => navigate(notification.actionUrl)
+            } : undefined
+          });
+        });
+
+        // Subscribe to global broadcasts
+        stompClient.subscribe('/topic/global', (message) => {
+          const notification = JSON.parse(message.body);
+          
+          toast.success(notification.title, {
+            description: notification.message,
+            style: {
+              background: '#3182ce',
+              color: '#ffffff',
+              border: '1px solid #2b6cb0'
+            },
+            action: notification.actionUrl ? {
+              label: notification.actionText || 'View',
+              onClick: () => navigate(notification.actionUrl)
+            } : undefined
+          });
+        });
+      },
+      onStompError: (frame) => {
+        console.error('WebSocket Error: ' + frame.headers['message']);
+      }
+    });
+
+    stompClient.activate();
+
+    return () => {
+      stompClient.deactivate();
+    };
   }, [user, navigate]);
 
-  if (!user) return null;
+  const fetchInitialUnreadCount = async () => {
+    if (!user) return;
+    try {
+      const count = await getUnreadNotificationCount(user.userId);
+      setUnreadCount(count);
+    } catch (error) {
+      console.error("Failed to fetch initial notification count:", error);
+    }
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -81,14 +156,20 @@ export default function DashboardLayout() {
               className="hover:bg-white/20 hover:scale-110 active:scale-90 p-2 rounded-lg transition-all duration-200 relative"
             >
               <Bell size={22} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold px-1 ring-2 ring-[#1E2A44]">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </Link>
+
             <button
               onClick={() => setIsChatOpen(!isChatOpen)}
-              className="hover:bg-white/10 p-2 rounded-lg transition-colors"
+              className="hover:bg-white/10 p-2 rounded-lg transition-colors text-white"
             >
               <MessageSquare size={22} />
             </button>
+
           </div>
         </div>
       </nav>

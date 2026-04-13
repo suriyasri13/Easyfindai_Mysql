@@ -121,4 +121,15 @@ public class FoundItem {
         this.contactInfo = contactInfo;
     }
 
+    private boolean isConfidential = false;
+    private String uniqueIdentifier;
+    private String hiddenDetail;
+
+    public boolean isConfidential() { return isConfidential; }
+    public void setConfidential(boolean confidential) { isConfidential = confidential; }
+    public String getUniqueIdentifier() { return uniqueIdentifier; }
+    public void setUniqueIdentifier(String uniqueIdentifier) { this.uniqueIdentifier = uniqueIdentifier; }
+    public String getHiddenDetail() { return hiddenDetail; }
+    public void setHiddenDetail(String hiddenDetail) { this.hiddenDetail = hiddenDetail; }
+
 }
