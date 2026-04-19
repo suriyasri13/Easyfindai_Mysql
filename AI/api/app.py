@@ -19,29 +19,34 @@ def match_ai():
     lost_image = request.files.get("lost_image")
     found_image = request.files.get("found_image")
 
-    lost_description = request.form.get("lost_description")
-    found_description = request.form.get("found_description")
+    lost_description = request.form.get("lost_description", "")
+    found_description = request.form.get("found_description", "")
 
-    if not lost_image or not found_image:
-        return jsonify({"error": "Both images are required"}), 400
+    lost_path = None
+    found_path = None
+    image_score = 0.0
 
-    lost_path = os.path.join(UPLOAD_FOLDER, lost_image.filename)
-    found_path = os.path.join(UPLOAD_FOLDER, found_image.filename)
+    if lost_image and found_image:
+        lost_path = os.path.join(UPLOAD_FOLDER, lost_image.filename)
+        found_path = os.path.join(UPLOAD_FOLDER, found_image.filename)
+        lost_image.save(lost_path)
+        found_image.save(found_path)
 
-    lost_image.save(lost_path)
-    found_image.save(found_path)
-
-    # Deep Image similarity
-    lost_features = extract_image_features(lost_path)
-    found_features = extract_image_features(found_path)
-    image_score = match_image_features(lost_features, found_features)
+        # Deep Image similarity
+        lost_features = extract_image_features(lost_path)
+        found_features = extract_image_features(found_path)
+        image_score = match_image_features(lost_features, found_features)
 
     # Deep Semantic Text similarity
     text_score = deep_text_similarity(lost_description, found_description)
 
     # Hybrid scoring
-    # We now trust the max of the two OR the weighted average to increase sensitivity
-    final_score = round((0.5 * image_score + 0.5 * text_score), 2)
+    if lost_path and found_path:
+        # We now trust the max of the two OR the weighted average to increase sensitivity
+        final_score = round((0.5 * image_score + 0.5 * text_score), 2)
+    else:
+        # Text-only match
+        final_score = text_score
     
     # Boost: If descriptions are highly similar, ensure it's at least a medium match
     if text_score > 0.8:

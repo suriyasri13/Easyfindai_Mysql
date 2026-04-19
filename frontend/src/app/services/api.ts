@@ -1,7 +1,9 @@
 const BASE_URL = "http://localhost:8080/api";
 
-export const getMatches = async () => {
-  const response = await fetch(`${BASE_URL}/match`);
+export const getMatches = async (userId?: string | number) => {
+  const url = userId ? `${BASE_URL}/match?userId=${userId}` : `${BASE_URL}/match`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(await response.text());
   const data = await response.json();
 
   return data.map((match: any) => ({
@@ -21,8 +23,18 @@ export const getMatches = async () => {
     confidence: match.confidenceScore * 100, // convert 0.9 → 90%
     matchReason: match.matchReason ? match.matchReason.split(', ') : ["AI visual & text similarity"],
     matchDate: new Date().toISOString(),
-    status: match.status
+    status: match.status,
+    isConfidential: match.lostItem?.confidential || match.foundItem?.confidential
   }));
+};
+
+export const verifySerialNumber = async (matchId: number, serialNumber: string) => {
+  const response = await fetch(`${BASE_URL}/match/${matchId}/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ serialNumber })
+  });
+  return await response.json();
 };
 
 export const confirmMatch = async (id: string | number) => {
@@ -67,6 +79,13 @@ export const sendChatMessage = async (message: ChatMessage): Promise<ChatMessage
     body: JSON.stringify(message),
   });
   if (!response.ok) throw new Error("Failed to send message");
+  return response.json();
+};
+
+export const initiateChat = async (matchId: string | number, senderId: string | number) => {
+  const response = await fetch(`${BASE_URL}/chat/initiate/${matchId}?senderId=${senderId}`, {
+    method: "POST",
+  });
   return response.json();
 };
 
@@ -195,8 +214,14 @@ export const reportItem = async (formData: FormData) => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || errorData.error || `Server Error: ${response.status}`);
+    // Try to get detailed text error if JSON fails
+    const errorText = await response.text().catch(() => "");
+    let errorData = {};
+    try {
+      errorData = JSON.parse(errorText);
+    } catch(e) {}
+
+    throw new Error((errorData as any).message || (errorData as any).error || errorText || `Server Error: ${response.status}`);
   }
 
   return response.json();

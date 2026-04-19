@@ -24,14 +24,15 @@ public class AIService {
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
 
-        builder.part("lost_image",
-                new FileSystemResource(lostImage));
+        if (lostImage != null && lostImage.exists()) {
+            builder.part("lost_image", new FileSystemResource(lostImage));
+        }
+        if (foundImage != null && foundImage.exists()) {
+            builder.part("found_image", new FileSystemResource(foundImage));
+        }
 
-        builder.part("found_image",
-                new FileSystemResource(foundImage));
-
-        builder.part("lost_description", lostDescription);
-        builder.part("found_description", foundDescription);
+        builder.part("lost_description", lostDescription != null ? lostDescription : "");
+        builder.part("found_description", foundDescription != null ? foundDescription : "");
 
         Mono<String> response = webClient.post()
                 .uri("/matchAI")

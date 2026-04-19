@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { MessageSquare, CheckCircle, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PersonalMatchChat from '../components/PersonalMatchChat';
@@ -31,17 +32,21 @@ interface Match {
 }
 
 export default function MatchResultsPage() {
+  const { user } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
-    fetchMatches();
-  }, []);
+    if (user) {
+      fetchMatches();
+    }
+  }, [user]);
 
   const fetchMatches = async () => {
+    if (!user) return;
     try {
-      const data = await getMatches();
+      const data = await getMatches(user.userId);
       setMatches(data);
     } catch (error) {
       console.error("Error fetching matches:", error);
