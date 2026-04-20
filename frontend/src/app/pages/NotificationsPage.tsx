@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Package, Search, CheckCircle, MessageCircle, Globe, Trash2, XCircle, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,6 +19,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('ALL');
+  const { refreshUnreadCount } = useOutletContext<{ refreshUnreadCount: () => void }>();
 
   useEffect(() => {
     if (user) {
@@ -46,6 +48,7 @@ export default function NotificationsPage() {
       const unreadPrivateIds = privateData.filter(n => !n.isRead).map(n => n.id);
       if (unreadPrivateIds.length > 0) {
         await Promise.all(unreadPrivateIds.map(id => markNotificationAsRead(id)));
+        refreshUnreadCount();
       }
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
@@ -57,6 +60,7 @@ export default function NotificationsPage() {
     try {
       await deleteNotification(id);
       setNotifications(prev => prev.filter(n => n.id !== id));
+      refreshUnreadCount();
       toast.success("Notification deleted");
     } catch (error) {
       toast.error("Failed to delete notification");
@@ -70,6 +74,7 @@ export default function NotificationsPage() {
     try {
       await clearAllNotifications(user.userId);
       setNotifications([]);
+      refreshUnreadCount();
       toast.success("All notifications cleared");
     } catch (error) {
       toast.error("Failed to clear notifications");
@@ -80,34 +85,39 @@ export default function NotificationsPage() {
     switch (type.toUpperCase()) {
       case 'GLOBAL':
         return {
-          bg: 'from-blue-100 to-white border-blue-300',
-          icon: <Globe className="text-blue-600" size={24} />,
-          badge: 'Public Alert'
+          bg: 'from-blue-600/10 to-transparent border-blue-500/20',
+          icon: <div className="p-3 bg-blue-500/20 rounded-xl"><Globe className="text-blue-400" size={24} /></div>,
+          badge: 'Public Alert',
+          accent: 'text-blue-400'
         };
       case 'CHAT':
         return {
-          bg: 'from-[#6366F1]/20 to-white border-[#6366F1]',
-          icon: <MessageCircle className="text-[#6366F1]" size={24} />,
-          badge: 'New Message'
+          bg: 'from-indigo-600/10 to-transparent border-indigo-500/20',
+          icon: <div className="p-3 bg-indigo-500/20 rounded-xl"><MessageCircle className="text-indigo-400" size={24} /></div>,
+          badge: 'New Message',
+          accent: 'text-indigo-400'
         };
       case 'FOUND':
         return {
-          bg: 'from-[#93C5FD]/20 to-white border-[#93C5FD]',
-          icon: <Search className="text-[#2563EB]" size={24} />,
-          badge: 'Found Item'
+          bg: 'from-sky-600/10 to-transparent border-sky-500/20',
+          icon: <div className="p-3 bg-sky-500/20 rounded-xl"><Search className="text-sky-400" size={24} /></div>,
+          badge: 'Found Item',
+          accent: 'text-sky-400'
         };
       case 'MATCH':
         return {
-          bg: 'from-[#86EFAC]/20 to-white border-[#86EFAC]',
-          icon: <CheckCircle className="text-[#16A34A]" size={24} />,
-          badge: 'Match Found'
+          bg: 'from-emerald-600/10 to-transparent border-emerald-500/20',
+          icon: <div className="p-3 bg-emerald-500/20 rounded-xl"><CheckCircle className="text-emerald-400" size={24} /></div>,
+          badge: 'Match Found',
+          accent: 'text-emerald-400'
         };
       case 'LOST':
       default:
         return {
-          bg: 'from-[#FCA5A5]/20 to-white border-[#FCA5A5]',
-          icon: <Package className="text-[#DC2626]" size={24} />,
-          badge: 'Lost Item'
+          bg: 'from-rose-600/10 to-transparent border-rose-500/20',
+          icon: <div className="p-3 bg-rose-500/20 rounded-xl"><Package className="text-rose-400" size={24} /></div>,
+          badge: 'Lost Item',
+          accent: 'text-rose-400'
         };
     }
   };
@@ -127,32 +137,32 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div>
-      <div className="mb-8 flex justify-between items-end">
+    <div className="max-w-5xl mx-auto pb-12">
+      <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-4xl text-[#1E2A44] font-bold">Notifications</h2>
-          <p className="text-gray-600 mt-2 text-base">Stay updated with your items and matches</p>
+          <h2 className="text-4xl text-[#1e293b] font-bold tracking-tight">Notifications</h2>
+          <p className="text-slate-500 mt-2 text-lg font-medium">Stay updated with your items and matches</p>
         </div>
         {notifications.length > 0 && (
           <button 
             onClick={handleClearAll}
-            className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-bold text-sm"
+            className="flex items-center gap-3 px-8 py-4 bg-slate-50 text-slate-500 hover:bg-rose-50 hover:text-rose-600 border border-slate-100 rounded-[1.5rem] transition-all font-bold text-sm shadow-sm"
           >
-            <XCircle size={18} />
+            <Trash2 size={20} />
             Clear All
           </button>
         )}
       </div>
 
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <div className="flex gap-3 mb-12 overflow-x-auto pb-4 no-scrollbar">
         {['ALL', 'UNREAD', 'MATCHES', 'CHATS'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg font-bold text-sm transition-all whitespace-nowrap ${
+            className={`px-8 py-4 rounded-[1.5rem] font-bold text-sm transition-all whitespace-nowrap shadow-sm border ${
               activeTab === tab 
-                ? 'bg-[#1E2A44] text-white shadow-md' 
-                : 'bg-white text-gray-600 hover:bg-gray-100'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-100 scale-105' 
+                : 'bg-white text-slate-500 hover:bg-slate-50 border-slate-100'
             }`}
           >
             {tab.charAt(0) + tab.slice(1).toLowerCase()}
@@ -161,15 +171,20 @@ export default function NotificationsPage() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl shadow-md p-12 text-center animate-pulse text-gray-400">
-          Loading notifications...
+        <div className="bg-white rounded-[2.5rem] shadow-xl p-20 text-center animate-pulse border border-slate-100">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-slate-400 text-lg font-bold uppercase tracking-widest">Synchronizing Intelligence...</p>
         </div>
       ) : notifications.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-12 text-center">
-          <p className="text-gray-500 text-base">No notifications yet</p>
+        <div className="bg-white rounded-[2.5rem] shadow-xl p-24 text-center border border-slate-100">
+          <div className="w-24 h-24 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-8">
+            <CheckCircle size={48} className="text-slate-300" />
+          </div>
+          <p className="text-[#1e293b] text-3xl font-bold mb-3 tracking-tight">You're all caught up!</p>
+          <p className="text-slate-500 text-lg font-medium">No new notifications detected by our AI sensors.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-8">
           {notifications.filter(n => {
             if (activeTab === 'ALL') return true;
             if (activeTab === 'UNREAD') return !n.isRead;
@@ -183,52 +198,60 @@ export default function NotificationsPage() {
             return (
               <div
                 key={notification.id}
-                className={`group relative bg-gradient-to-r ${style.bg} rounded-xl shadow-md p-5 border-2 transition-all hover:shadow-lg ${
-                  isUnread ? 'ring-2 ring-[#3B82F6]' : ''
+                className={`group relative bg-white rounded-[2.5rem] shadow-xl p-10 border border-slate-100 transition-all hover:shadow-2xl hover:-translate-y-1 ${
+                  isUnread ? 'border-l-8 border-l-blue-500' : ''
                 }`}
               >
                 {/* Individual Clear Button */}
                 <button 
                   onClick={() => handleDelete(notification.id)}
-                  className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-100 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200"
+                  className="absolute top-8 right-8 p-4 text-slate-300 hover:text-white hover:bg-rose-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"
                   title="Remove notification"
                 >
-                  <Trash2 size={20} />
+                  <Trash2 size={22} />
                 </button>
 
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0">{style.icon}</div>
-                  <div className="flex-1 pr-8">
-                    <div className="flex items-start justify-between">
-                      <h3 className="text-xl text-[#1E2A44] mb-1 font-bold">
+                <div className="flex items-start gap-10">
+                  <div className="flex-shrink-0">
+                    <div className="bg-slate-50 p-5 rounded-[2rem] border border-slate-100 shadow-inner group-hover:scale-110 transition-transform">
+                      {style.icon}
+                    </div>
+                  </div>
+                  <div className="flex-1 pr-16">
+                    <div className="flex items-start justify-between mb-4">
+                      <h3 className="text-2xl text-[#1e293b] font-bold tracking-tight leading-tight">
                         {notification.title}
                       </h3>
-                      <div className="flex gap-2">
+                      <div className="flex gap-4">
                         {style.badge && (
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            notification.type === 'GLOBAL' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+                          <span className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                            notification.type === 'GLOBAL' ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-500 border border-slate-100'
                           }`}>
                             {style.badge}
                           </span>
                         )}
                         {isUnread && (
-                          <span className="px-3 py-1 bg-[#3B82F6] text-white text-[10px] rounded-full font-bold uppercase tracking-wider transition-all animate-pulse">
+                          <span className="px-5 py-2 bg-blue-500 text-white text-[10px] rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-100">
                             New
                           </span>
                         )}
                       </div>
                     </div>
-                    <p className="text-gray-700 text-base mb-2">{notification.message}</p>
-                    <p className="text-gray-500 text-sm font-medium">{formatDate(notification.createdAt)}</p>
+                    <p className="text-slate-500 text-lg mb-8 leading-relaxed font-medium">{notification.message}</p>
                     
-                    {notification.actionUrl && (
-                      <button
-                        onClick={() => navigate(notification.actionUrl!)}
-                        className="mt-3 flex items-center gap-1 text-sm font-bold text-[#1E2A44] hover:text-[#3B82F6] transition-colors"
-                      >
-                        {notification.actionText || 'View Details'} <ChevronRight size={16} />
-                      </button>
-                    )}
+                    <div className="flex items-center justify-between pt-6 border-t border-slate-50 mt-auto">
+                      <p className="text-slate-400 text-xs font-black tracking-widest uppercase">{formatDate(notification.createdAt)}</p>
+                      
+                      {notification.actionUrl && (
+                        <button
+                          onClick={() => navigate(notification.actionUrl!)}
+                          className={`flex items-center gap-3 text-sm font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-all group/btn`}
+                        >
+                          {notification.actionText || 'Explore Details'} 
+                          <ChevronRight size={20} className="transform group-hover/btn:translate-x-2 transition-transform" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

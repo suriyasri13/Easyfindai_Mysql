@@ -8,7 +8,10 @@ import {
   Bell, 
   MessageSquare,
   Menu,
-  X
+  Search,
+  X,
+  LogOut,
+  Home
 } from 'lucide-react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -23,7 +26,7 @@ import { toast } from 'sonner';
 import AIChatPanel from '../components/AIChatPanel';
 
 export default function DashboardLayout() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -54,8 +57,13 @@ export default function DashboardLayout() {
           const notification = JSON.parse(message.body);
           setUnreadCount((prev) => prev + 1);
           
-          toast(notification.title, {
+          toast.message(notification.title, {
             description: notification.message,
+            style: {
+              background: '#1E2A44',
+              color: '#FFFFFF',
+              border: '1px solid #3B82F6'
+            },
             action: notification.actionUrl ? {
               label: notification.actionText || 'View',
               onClick: () => navigate(notification.actionUrl)
@@ -70,9 +78,9 @@ export default function DashboardLayout() {
           toast.success(notification.title, {
             description: notification.message,
             style: {
-              background: '#3182ce',
+              background: '#3B82F6',
               color: '#ffffff',
-              border: '1px solid #2b6cb0'
+              border: '2px solid #FFFFFF'
             },
             action: notification.actionUrl ? {
               label: notification.actionText || 'View',
@@ -103,137 +111,122 @@ export default function DashboardLayout() {
     }
   };
 
+  const contextValue = { unreadCount, refreshUnreadCount: fetchInitialUnreadCount };
+
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      {/* Top Navigation Bar */}
-      <nav className="bg-[#1E2A44] text-white shadow-lg sticky top-0 z-40">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden hover:bg-white/10 p-2 rounded-lg transition-colors"
-            >
-              {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-            <h1 className="text-2xl font-semibold">EaseFind.AI</h1>
+    <div className="min-h-screen relative text-slate-900 overflow-x-hidden bg-[#e0f2fe]">
+      {/* Top Navigation Bar - Exactly as in screenshot */}
+      <nav className="sticky top-0 z-40 bg-[#1e293b] h-[72px] shadow-sm">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between h-full px-8">
+          {/* Left: Logo */}
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
+            <span className="text-2xl font-bold tracking-tight text-white">EaseFind.AI</span>
           </div>
 
-          <div className="hidden md:flex items-center gap-6">
-            <Link
-              to="/dashboard/report-item"
-              className="hover:bg-white/20 hover:scale-105 active:scale-95 px-4 py-2 rounded-lg transition-all duration-200 text-base font-medium"
+          {/* Center: Navigation Links */}
+          <div className="hidden md:flex items-center gap-10">
+            {[
+              { to: "/dashboard/report-item", label: "Report Item" },
+              { to: "/dashboard/lost-items", label: "Lost Items" },
+              { to: "/dashboard/found-items", label: "Found Items" },
+              { to: "/dashboard/match-results", label: "Match Results" },
+              { to: "/dashboard/gis-map", label: "GIS Map" },
+            ].map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`text-[15px] transition-all duration-200 ${
+                  isActive(link.to) 
+                    ? "text-white font-bold" 
+                    : "text-slate-300 hover:text-white font-medium"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right: Icons */}
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="text-white/90 hover:text-white transition-all"
+              title="Home"
             >
-              Report Item
-            </Link>
-            <Link
-              to="/dashboard/lost-items"
-              className="hover:bg-white/20 hover:scale-105 active:scale-95 px-4 py-2 rounded-lg transition-all duration-200 text-base font-medium"
-            >
-              Lost Items
-            </Link>
-            <Link
-              to="/dashboard/found-items"
-              className="hover:bg-white/20 hover:scale-105 active:scale-95 px-4 py-2 rounded-lg transition-all duration-200 text-base font-medium"
-            >
-              Found Items
-            </Link>
-            <Link
-              to="/dashboard/match-results"
-              className="hover:bg-white/20 hover:scale-105 active:scale-95 px-4 py-2 rounded-lg transition-all duration-200 text-base font-medium"
-            >
-              Match Results
-            </Link>
-            <Link 
-              to="/dashboard/gis-map"
-              className="hover:bg-white/20 hover:scale-105 active:scale-95 px-4 py-2 rounded-lg transition-all duration-200 text-base font-medium"
-            >
-              GIS Map
-            </Link>
+              <Home size={24} />
+            </button>
+
             <Link
               to="/dashboard/notifications"
-              className="hover:bg-white/20 hover:scale-110 active:scale-90 p-2 rounded-lg transition-all duration-200 relative"
+              className="relative text-white/90 hover:text-white transition-all"
+              title="Notifications"
             >
-              <Bell size={22} />
+              <Bell size={24} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold px-1 ring-2 ring-[#1E2A44]">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
+                <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1e293b]"></span>
               )}
             </Link>
 
             <button
               onClick={() => setIsChatOpen(!isChatOpen)}
-              className="hover:bg-white/10 p-2 rounded-lg transition-colors text-white"
+              className="text-white/90 hover:text-white transition-all"
+              title="AI Chat"
             >
-              <MessageSquare size={22} />
+              <MessageSquare size={24} />
             </button>
-
+            
+            <button
+              onClick={() => {
+                logout();
+                navigate('/');
+              }}
+              className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all"
+              title="Logout"
+            >
+              <LogOut size={20} />
+            </button>
           </div>
         </div>
       </nav>
 
       <div className="flex">
-        {/* Sidebar */}
+        {/* Sidebar - Light Theme as in image */}
         <aside
           className={`
-            fixed lg:sticky top-0 left-0 h-screen bg-white shadow-lg z-30 transition-transform
-            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            w-64 pt-20 lg:pt-4
+            fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] bg-white z-30 transition-all duration-300 border-r border-slate-200
+            ${isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 w-64'}
           `}
         >
-          <nav className="p-4 space-y-2">
-            <Link
-              to="/dashboard"
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base font-medium group ${
-                isActive('/dashboard')
-                  ? 'bg-[#1E2A44] text-white shadow-md'
-                  : 'hover:bg-blue-50 hover:text-[#1E2A44] hover:translate-x-1 text-gray-700'
-              }`}
-            >
-              <LayoutDashboard size={22} className={`transition-colors ${isActive('/dashboard') ? 'text-white' : 'text-blue-600 group-hover:text-[#1E2A44]'}`} />
-              <span className="font-semibold">Dashboard</span>
-            </Link>
-            <Link
-              to="/dashboard/help"
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base font-medium group ${
-                isActive('/dashboard/help')
-                  ? 'bg-[#1E2A44] text-white shadow-md'
-                  : 'hover:bg-orange-50 hover:text-orange-700 hover:translate-x-1 text-gray-700'
-              }`}
-            >
-              <HelpCircle size={22} className={`transition-colors ${isActive('/dashboard/help') ? 'text-white' : 'text-orange-600 group-hover:text-orange-700'}`} />
-              <span className="font-semibold">Help</span>
-            </Link>
-            <Link
-              to="/dashboard/contact"
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base font-medium group ${
-                isActive('/dashboard/contact')
-                  ? 'bg-[#1E2A44] text-white shadow-md'
-                  : 'hover:bg-green-50 hover:text-green-700 hover:translate-x-1 text-gray-700'
-              }`}
-            >
-              <Phone size={22} className={`transition-colors ${isActive('/dashboard/contact') ? 'text-white' : 'text-green-600 group-hover:text-green-700'}`} />
-              <span className="font-semibold">Contact Us</span>
-            </Link>
-            <Link
-              to="/dashboard/settings"
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base font-medium group ${
-                isActive('/dashboard/settings')
-                  ? 'bg-[#1E2A44] text-white shadow-md'
-                  : 'hover:bg-purple-50 hover:text-purple-700 hover:translate-x-1 text-gray-700'
-              }`}
-            >
-              <Settings size={22} className={`transition-colors ${isActive('/dashboard/settings') ? 'text-white' : 'text-purple-600 group-hover:text-purple-700'}`} />
-              <span className="font-semibold">Settings</span>
-            </Link>
+          <nav className="p-6 space-y-3">
+            {[
+              { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, color: "text-blue-500" },
+              { to: "/dashboard/help", label: "Help", icon: HelpCircle, color: "text-orange-500" },
+              { to: "/dashboard/contact", label: "Contact Us", icon: Phone, color: "text-green-500" },
+              { to: "/dashboard/settings", label: "Settings", icon: Settings, color: "text-purple-500" },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 font-bold ${
+                  isActive(item.to)
+                    ? "bg-slate-100 text-[#1e293b] shadow-sm"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-[#1e293b]"
+                }`}
+              >
+                <item.icon size={22} className={`${item.color}`} />
+                <span className="text-sm">{item.label}</span>
+              </Link>
+            ))}
           </nav>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-8">
-          <Outlet />
+        {/* Main Content - Light Theme */}
+        <main className="flex-1 p-8 lg:p-12 min-h-[calc(100vh-4rem)]">
+          <div className="max-w-7xl mx-auto">
+            <Outlet context={contextValue} />
+          </div>
         </main>
       </div>
 
@@ -243,7 +236,7 @@ export default function DashboardLayout() {
       {/* Overlay for mobile sidebar */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Calendar, MapPin, User, Phone, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Calendar, MapPin, User, Trash2 } from "lucide-react";
 import { Package } from "lucide-react";
+import { Button } from "../components/ui/button";
 import { getLostItems, deleteLostItem } from "../services/api";
 import { toast } from "sonner";
 
@@ -21,6 +23,7 @@ interface Item {
 }
 
 export default function LostItemsPage() {
+  const navigate = useNavigate();
   const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
@@ -81,110 +84,100 @@ export default function LostItemsPage() {
   };
 
   return (
-    <div>
-      <div className="mb-8 flex justify-between items-end">
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-4xl mb-6 text-[#1E2A44] font-bold">
-            Lost Items
-          </h2>
-          <p className="text-gray-600 text-base">
-            Browse recently reported lost items in your area
-          </p>
+          <h2 className="text-4xl text-[#1e293b] font-bold tracking-tight">Lost Items</h2>
+          <p className="text-slate-500 mt-2 text-lg font-medium">Search through items reported as lost on campus.</p>
         </div>
-        {items.length > 0 && (
-          <button onClick={handleClearAll} className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-semibold flex items-center gap-2 transition-colors mb-2">
-            <Trash2 size={18} /> Clear All
-          </button>
-        )}
+        <div className="flex gap-4">
+          <Button 
+            onClick={() => navigate('/dashboard/report-item')}
+            className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-8 py-4 rounded-xl transition-all font-bold text-base"
+          >
+            Report Lost Item
+          </Button>
+        </div>
       </div>
 
       {items.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-12 text-center">
-          <Package
-            size={48}
-            className="mx-auto text-gray-400 mb-4"
-          />
-          <p className="text-gray-500 text-lg">
-            No lost items reported yet
-          </p>
-          <p className="text-gray-400 text-sm mt-2">
-            Lost items will appear here once reported
-          </p>
+        <div className="bg-white rounded-3xl shadow-sm p-20 text-center border border-slate-200">
+          <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Package size={40} className="text-slate-300" />
+          </div>
+          <p className="text-[#1e293b] text-2xl font-bold mb-2">No lost items reported yet</p>
+          <p className="text-slate-500 text-lg font-medium">Lost items will appear here once reported by the community.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {items.map((item) => (
             <div
               key={item.id}
-              className={`bg-gradient-to-br from-[#FCA5A5]/20 to-white rounded-xl shadow-lg p-5 border-2 hover:shadow-xl transition-all relative group overflow-hidden ${item.status === "MATCHED" ? "border-green-400 opacity-90" : "border-[#FCA5A5]"}`}
+              className="group bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full"
             >
-              {item.status === "MATCHED" && (
-                <div className="absolute top-4 right-[-35px] bg-green-500 text-white text-xs font-bold px-10 py-1 rotate-45 shadow-md z-20">
-                  MATCH FOUND
-                </div>
-              )}
-
-              <button
-                onClick={() => handleDelete(item.id)}
-                className="absolute top-4 left-4 p-2 bg-white/80 hover:bg-red-500 hover:text-white text-red-500 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-30"
-                title="Clear Item"
-              >
-                <Trash2 size={18} />
-              </button>
-
-              {item.image && (
-                <img
-                  src={item.image}
-                  alt={item.itemName}
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-              )}
-              <div className="mb-3 flex items-center gap-2">
-                <span className="px-3 py-1 bg-[#FCA5A5] text-gray-800 text-sm rounded-full font-semibold">
-                  LOST
-                </span>
-              </div>
-              <h3 className="text-xl text-[#1E2A44] mb-2 font-bold">
-                {item.itemName}
-              </h3>
-              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                {item.description}
-              </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-[#1E2A44]">
-                    Category:
-                  </span>
-                  <span className="text-gray-700">
-                    {item.category}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={16} className="text-red-500" />
-                  <span className="text-gray-700 text-sm line-clamp-1">
-                    {item.location}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar
-                    size={16}
-                    className="text-red-500"
+              <div className="relative aspect-video overflow-hidden border-b border-slate-100">
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.itemName}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <span className="text-gray-700 text-sm">
-                    {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
-                  </span>
+                ) : (
+                  <div className="w-full h-full bg-slate-50 flex items-center justify-center">
+                    <Package size={48} className="text-slate-200" />
+                  </div>
+                )}
+                
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="absolute top-4 left-4 p-3 bg-white/90 backdrop-blur-md hover:bg-rose-500 hover:text-white text-rose-500 rounded-xl shadow-lg transition-all opacity-0 group-hover:opacity-100 z-30"
+                  title="Clear Item"
+                >
+                  <Trash2 size={18} />
+                </button>
+
+                <div className="absolute top-4 right-4 bg-[#ef4444] text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md">
+                  LOST
                 </div>
-                <div className="flex items-center gap-2">
-                  <User size={16} className="text-red-500" />
-                  <span className="text-gray-700 text-sm">
-                    {item.userName}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone size={16} className="text-red-500" />
-                  <span className="line-clamp-1 text-sm text-gray-700">
-                    {item.contactInfo}
-                  </span>
+              </div>
+
+              <div className="p-8 flex-1 flex flex-col">
+                <h3 className="text-2xl text-[#1e293b] mb-3 font-bold line-clamp-1 group-hover:text-blue-600 transition-colors">
+                  {item.itemName}
+                </h3>
+                <p className="text-sm text-slate-500 mb-6 line-clamp-2 leading-relaxed font-medium">
+                  {item.description}
+                </p>
+
+                <div className="space-y-4 mt-auto">
+                  <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <MapPin size={18} className="text-blue-500" />
+                    <span className="text-slate-600 text-sm font-bold line-clamp-1">
+                      {item.location}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-slate-400">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={14} className="text-blue-500" />
+                      <span className="text-xs font-bold uppercase tracking-wide">
+                        {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <User size={14} className="text-blue-500" />
+                      <span className="text-xs font-bold line-clamp-1">
+                        {item.userName}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-6 border-t border-slate-100">
+                    <p className="text-xs text-slate-400 font-black mb-2 uppercase tracking-widest">Contact Information</p>
+                    <p className="text-sm text-blue-600 font-black tracking-wide">
+                      {item.contactInfo}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

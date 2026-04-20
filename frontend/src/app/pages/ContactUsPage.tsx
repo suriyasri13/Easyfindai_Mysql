@@ -28,144 +28,123 @@ export default function ContactUsPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <h2 className="text-4xl mb-8 text-[#1E2A44] font-bold">
-        Contact Us
-      </h2>
+    <div className="max-w-6xl mx-auto space-y-10">
+      <div className="mb-10">
+        <h2 className="text-4xl text-[#1e293b] font-bold tracking-tight">Contact Us</h2>
+        <p className="text-slate-500 mt-2 text-lg font-medium">
+          We're here to help you with any questions or concerns
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Contact Information */}
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h3 className="text-2xl text-[#1E2A44] mb-6 font-bold">
-              Get In Touch
+          <div className="bg-white rounded-[2rem] shadow-xl p-10 border border-slate-100 h-full">
+            <h3 className="text-2xl text-[#1e293b] font-bold mb-10 flex items-center gap-3">
+               <span className="p-2 bg-blue-50 rounded-lg">📞</span>
+               Get In Touch
             </h3>
 
             <div className="space-y-6">
-              <div className="flex items-start gap-4 bg-gradient-to-r from-blue-50 to-white p-5 rounded-xl border border-blue-100">
-                <div className="bg-blue-600 p-3 rounded-lg">
-                  <MapPin size={24} className="text-white" />
+              {[
+                { 
+                  icon: MapPin, 
+                  label: "Address", 
+                  value: "No 12: 555 MCE Campus Road, Chennai, Tamil Nadu", 
+                  color: "bg-blue-50 text-blue-600",
+                },
+                { 
+                  icon: Phone, 
+                  label: "Phone", 
+                  value: "7200076786", 
+                  color: "bg-emerald-50 text-emerald-600",
+                },
+                { 
+                  icon: Mail, 
+                  label: "Email", 
+                  value: "support@easefind.ai", 
+                  color: "bg-purple-50 text-purple-600",
+                },
+                { 
+                  icon: Clock, 
+                  label: "Business Hours", 
+                  value: "Monday - Friday, 9:00 AM - 5:00 PM", 
+                  color: "bg-orange-50 text-orange-600",
+                }
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-start gap-6 p-6 rounded-2xl border border-slate-50 hover:bg-slate-50 transition-all group">
+                  <div className={`${item.color} p-4 rounded-xl shadow-sm group-hover:shadow-md transition-all`}>
+                    <item.icon size={26} />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-[#1e293b] mb-1 text-sm uppercase tracking-widest">
+                      {item.label}
+                    </h4>
+                    <p className="text-slate-500 text-base leading-relaxed font-medium">
+                      {item.value}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-[#1E2A44] mb-1 text-lg">
-                    Address
-                  </h4>
-                  <p className="text-gray-700 text-base">
-                    No 12: 555 MCE Campus Road
-                    <br />
-                    Chennai, Tamil Nadu
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 bg-gradient-to-r from-green-50 to-white p-5 rounded-xl border border-green-100">
-                <div className="bg-green-600 p-3 rounded-lg">
-                  <Phone size={24} className="text-white" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#1E2A44] mb-1 text-lg">
-                    Phone
-                  </h4>
-                  <p className="text-gray-700 text-base">
-                    7200076786
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 bg-gradient-to-r from-purple-50 to-white p-5 rounded-xl border border-purple-100">
-                <div className="bg-purple-600 p-3 rounded-lg">
-                  <Mail size={24} className="text-white" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#1E2A44] mb-1 text-lg">
-                    Email
-                  </h4>
-                  <p className="text-gray-700 text-base">
-                    support@easefind.ai
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 bg-gradient-to-r from-orange-50 to-white p-5 rounded-xl border border-orange-100">
-                <div className="bg-orange-600 p-3 rounded-lg">
-                  <Clock size={24} className="text-white" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-[#1E2A44] mb-1 text-lg">
-                    Business Hours
-                  </h4>
-                  <p className="text-gray-700 text-base">
-                    Monday - Friday
-                    <br />
-                    9:00 AM - 5:00 PM
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Contact Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h3 className="text-2xl text-[#1E2A44] mb-6 font-bold">
+        <div className="bg-white rounded-[2rem] shadow-xl p-10 border border-slate-100">
+          <h3 className="text-2xl text-[#1e293b] font-bold mb-10 flex items-center gap-3">
+            <span className="p-2 bg-purple-50 rounded-lg">✉️</span>
             Send Us a Message
           </h3>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Label
-                htmlFor="name"
-                className="text-gray-700 font-semibold text-base mb-2 block"
-              >
-                Your Name *
-              </Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                className="border-2 border-gray-200 focus:border-[#14B8A6] focus:ring-2 focus:ring-[#14B8A6]/20 text-base"
-              />
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <Label htmlFor="name" className="text-[#1e293b] font-bold text-base block">
+                  Your Name
+                </Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="John Doe"
+                  className="bg-slate-50 border-slate-100 text-slate-900 focus:border-blue-500 focus:ring-blue-500/10 py-7 text-base rounded-2xl"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-[#1e293b] font-bold text-base block">
+                  Your Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="john@example.com"
+                  className="bg-slate-50 border-slate-100 text-slate-900 focus:border-blue-500 focus:ring-blue-500/10 py-7 text-base rounded-2xl"
+                />
+              </div>
             </div>
 
-            <div>
-              <Label
-                htmlFor="email"
-                className="text-gray-700 font-semibold text-base mb-2 block"
-              >
-                Your Email *
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="border-2 border-gray-200 focus:border-[#14B8A6] focus:ring-2 focus:ring-[#14B8A6]/20 text-base"
-              />
-            </div>
-
-            <div>
-              <Label
-                htmlFor="message"
-                className="text-gray-700 font-semibold text-base mb-2 block"
-              >
-                Message *
+            <div className="space-y-3">
+              <Label htmlFor="message" className="text-[#1e293b] font-bold text-base block">
+                Message
               </Label>
               <Textarea
                 id="message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Type your message here..."
-                className="border-2 border-gray-200 focus:border-[#14B8A6] focus:ring-2 focus:ring-[#14B8A6]/20 min-h-[160px] text-base"
+                placeholder="How can we help you today?"
+                className="bg-slate-50 border-slate-100 text-slate-900 focus:border-blue-500 focus:ring-blue-500/10 min-h-[200px] text-base p-6 rounded-2xl"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-[#1E2A44] hover:bg-[#2D3E5F] text-white py-6 text-base font-semibold shadow-md hover:shadow-lg transition-all"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-8 text-xl font-bold shadow-xl shadow-blue-100 transition-all rounded-2xl"
             >
-              <Send size={20} className="mr-2" />
+              <Send size={24} className="mr-3" />
               Send Message
             </Button>
           </form>

@@ -39,78 +39,96 @@ export default function DashboardHome() {
   ];
 
   return (
-    <div className="space-y-8">
-
+    <div className="space-y-10">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-[#1E2A44] to-[#2D3E5F] text-white p-8 rounded-2xl shadow-lg">
-        <h2 className="text-3xl mb-2">Welcome back, {user?.fullName}!</h2>
-        <p className="text-white/80">
-          Track your lost and found items, view matches, and reconnect with your belongings.
-        </p>
+      <div className="bg-[#1e293b] text-white p-12 rounded-[2rem] shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700"></div>
+        <div className="relative z-10">
+          <h2 className="text-4xl font-bold mb-4 tracking-tight">Welcome back, {user?.fullName}!</h2>
+          <p className="text-slate-300 text-lg max-w-2xl font-medium leading-relaxed">
+            Track your lost items, view real-time AI matches, and manage your reported belongings all in one place.
+          </p>
+        </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {stats.map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-            <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center mb-4`}>
-              <stat.icon size={24} />
+          <div key={idx} className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 hover:scale-105 transition-all duration-300 group">
+            <div className={`w-14 h-14 ${stat.color} rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:shadow-md transition-all`}>
+              <stat.icon size={28} />
             </div>
-            <p className="text-gray-600 text-sm">{stat.label}</p>
-            <p className="text-3xl mt-1 text-[#1E2A44]">{stat.value}</p>
+            <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-2">{stat.label}</p>
+            <p className="text-4xl text-[#1e293b] font-black">{stat.value}</p>
           </div>
         ))}
       </div>
 
       {/* Quick Actions */}
       <div>
-        <h3 className="text-xl mb-4 text-[#1E2A44]">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h3 className="text-2xl mb-8 text-[#1e293b] font-bold tracking-tight">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {quickActions.map((action, idx) => (
             <Link
               key={idx}
               to={action.path}
-              className={`${action.color} text-gray-800 p-6 rounded-xl shadow-md transition-all hover:scale-105 hover:shadow-lg`}
+              className={`${action.color} text-slate-900 p-10 rounded-[2rem] shadow-xl transition-all hover:-translate-y-2 hover:shadow-2xl border border-white/40 flex flex-col items-center justify-center group`}
             >
-              <p className="text-lg font-medium">{action.label}</p>
+              <p className="text-2xl font-black text-center">{action.label}</p>
+              <div className="mt-4 w-12 h-1 bg-black/10 rounded-full group-hover:w-20 transition-all"></div>
             </Link>
           ))}
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <h3 className="text-xl mb-4 text-[#1E2A44]">Recent Activity</h3>
+      <div className="bg-white p-10 rounded-[2rem] shadow-xl border border-slate-100">
+        <div className="flex items-center justify-between mb-8">
+          <h3 className="text-2xl text-[#1e293b] font-bold tracking-tight">Recent Activity</h3>
+          <Link to="/dashboard/notifications" className="text-blue-600 font-bold hover:bg-blue-50 px-4 py-2 rounded-xl transition-all">View All</Link>
+        </div>
 
-        <div className="space-y-3">
-
-          <div className="flex items-center gap-4 p-3 bg-[#86EFAC]/20 rounded-lg border border-[#86EFAC]/30">
-            <CheckCircle className="text-[#16A34A]" size={20} />
-            <div>
-              <p className="text-sm text-gray-800">New match found for "Laptop"</p>
-              <p className="text-xs text-gray-500">2 hours ago</p>
+        <div className="space-y-6">
+          <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
+            <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm">
+              <CheckCircle size={28} />
+            </div>
+            <div className="flex-1">
+              <p className="text-lg text-[#1e293b] font-bold">New match found for "Laptop"</p>
+              <p className="text-slate-500 font-medium">2 hours ago</p>
+            </div>
+            <div className="px-5 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-200">
+              Match
             </div>
           </div>
 
-          <div className="flex items-center gap-4 p-3 bg-[#93C5FD]/20 rounded-lg border border-[#93C5FD]/30">
-            <Search className="text-[#2563EB]" size={20} />
-            <div>
-              <p className="text-sm text-gray-800">Found item "Wallet" reported</p>
-              <p className="text-xs text-gray-500">5 hours ago</p>
+          <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
+            <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+              <Search size={28} />
+            </div>
+            <div className="flex-1">
+              <p className="text-lg text-[#1e293b] font-bold">Found item "Wallet" reported</p>
+              <p className="text-slate-500 font-medium">5 hours ago</p>
+            </div>
+            <div className="px-5 py-2 bg-blue-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-200">
+              Found
             </div>
           </div>
 
-          <div className="flex items-center gap-4 p-3 bg-[#FCA5A5]/20 rounded-lg border border-[#FCA5A5]/30">
-            <Package className="text-[#DC2626]" size={20} />
-            <div>
-              <p className="text-sm text-gray-800">Lost item "Keys" reported</p>
-              <p className="text-xs text-gray-500">1 day ago</p>
+          <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
+            <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center shadow-sm">
+              <Package size={28} />
+            </div>
+            <div className="flex-1">
+              <p className="text-lg text-[#1e293b] font-bold">Lost item "Keys" reported</p>
+              <p className="text-slate-500 font-medium">1 day ago</p>
+            </div>
+            <div className="px-5 py-2 bg-rose-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-200">
+              Lost
             </div>
           </div>
-
         </div>
       </div>
-
     </div>
   );
 }

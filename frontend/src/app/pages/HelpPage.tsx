@@ -8,85 +8,69 @@ export default function HelpPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-3xl mb-6 text-[#1E2A44] font-semibold">Help Center</h2>
+    <div className="max-w-5xl mx-auto space-y-10">
+      <div className="bg-white rounded-[2rem] shadow-xl p-10 border border-slate-100">
+        <h2 className="text-4xl mb-10 text-[#1e293b] font-bold tracking-tight">Help Center</h2>
 
-        <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 mb-8 border border-blue-100">
-          <p className="text-gray-700 leading-relaxed mb-6 text-base">
-            If you need assistance, please reach out through Contact Us or use the AI Chat for
-            quick help. Our team is here to support you with any questions or issues you may
-            have.
+        <div className="bg-slate-50 rounded-[2rem] p-10 mb-12 border border-slate-100 shadow-sm">
+          <p className="text-slate-500 leading-relaxed mb-10 text-lg font-medium">
+            Need help? Reach out through our contact channels or use our real-time AI assistance
+            for instant support with reporting items, tracking matches, or account management.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-8">
             <Link to="/dashboard/contact" className="flex-1">
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-base font-semibold shadow-md hover:shadow-lg transition-all">
-                <Phone size={20} className="mr-2" />
-                Go to Contact Us
+              <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-8 text-lg font-bold shadow-xl shadow-emerald-100 transition-all rounded-2xl">
+                <Phone size={24} className="mr-3" />
+                Contact Support
               </Button>
             </Link>
             <Button 
               onClick={() => setIsChatOpen(true)}
-              className="flex-1 bg-[#1E2A44] hover:bg-[#2D3E5F] text-white py-6 text-base font-semibold shadow-md hover:shadow-lg transition-all"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-8 text-lg font-bold shadow-xl shadow-blue-100 transition-all rounded-2xl"
             >
-              <MessageSquare size={20} className="mr-2" />
-              Open AI Chat
+              <MessageSquare size={24} className="mr-3" />
+              Chat with EaseFind AI
             </Button>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-xl text-[#1E2A44] mb-3 font-semibold">Frequently Asked Questions</h3>
-          </div>
+        <div className="space-y-10">
+          <h3 className="text-2xl text-[#1e293b] font-bold flex items-center gap-3">
+            <span className="p-2 bg-blue-50 text-blue-500 rounded-lg">❓</span>
+            Frequently Asked Questions
+          </h3>
 
-          <div className="space-y-4">
-            <div className="bg-gray-50 rounded-lg p-5">
-              <h4 className="text-lg mb-2 text-[#1E2A44] font-medium">How do I report a lost item?</h4>
-              <p className="text-gray-600 text-base">
-                Navigate to "Report Item" from the top navigation bar, select "Lost Item", fill
-                in the details including item name, category, description, and location, then
-                submit your report.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-5">
-              <h4 className="text-lg mb-2 text-[#1E2A44] font-medium">How does the matching system work?</h4>
-              <p className="text-gray-600 text-base">
-                Our AI-powered system automatically matches lost and found items based on
-                category, keywords in descriptions, and image similarity. You'll receive
-                notifications when potential matches are found.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-5">
-              <h4 className="text-lg mb-2 text-[#1E2A44] font-medium">
-                Can I chat with someone who found my item?
-              </h4>
-              <p className="text-gray-600 text-base">
-                Yes! Once a match is confirmed, you can use the Personal Chat feature to
-                communicate directly with the person who found your item or the owner of a lost
-                item you found.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-5">
-              <h4 className="text-lg mb-2 text-[#1E2A44] font-medium">What file types can I upload?</h4>
-              <p className="text-gray-600 text-base">
-                You can upload JPG and PNG images with a maximum file size of 5MB. Clear photos
-                help improve matching accuracy.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-5">
-              <h4 className="text-lg mb-2 text-[#1E2A44] font-medium">How do I enable location services?</h4>
-              <p className="text-gray-600 text-base">
-                When reporting an item, click the "Enable Current Location" button. Your browser
-                will prompt you to allow location access. This helps us automatically fetch and
-                display your current GPS coordinates.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              {
+                q: "How do I report a lost item?",
+                a: "Navigate to \"Report Item\" from the top navigation bar, select \"Lost Item\", fill in the details including item name, category, description, and location, then submit your report."
+              },
+              {
+                q: "How does the matching system work?",
+                a: "Our AI-powered system automatically matches lost and found items based on category, keywords in descriptions, and image similarity. You'll receive notifications when potential matches are found."
+              },
+              {
+                q: "Can I chat with someone who found my item?",
+                a: "Yes! Once a match is confirmed, you can use the Personal Chat feature to communicate directly with the person who found your item or the owner of a lost item you found."
+              },
+              {
+                q: "What file types can I upload?",
+                a: "You can upload JPG and PNG images with a maximum file size of 5MB. Clear photos help improve matching accuracy."
+              },
+              {
+                q: "How do I enable location services?",
+                a: "When reporting an item, click the \"Enable Current Location\" button. Your browser will prompt you to allow location access. This helps us automatically fetch and display your current GPS coordinates."
+              }
+            ].map((faq, idx) => (
+              <div key={idx} className="bg-white rounded-3xl p-8 border border-slate-100 hover:border-blue-200 hover:shadow-lg transition-all group shadow-sm">
+                <h4 className="text-xl mb-4 text-[#1e293b] font-bold group-hover:text-blue-600 transition-colors">{faq.q}</h4>
+                <p className="text-slate-500 text-base leading-relaxed font-medium">
+                  {faq.a}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -22,7 +23,11 @@ import ProtectedRoute from "./components/ProtectedRoute"; // ✅ correct path
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <LoginPage />, // ✅ FIX
+    element: <LandingPage />,
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
   },
   {
     path: "/register",

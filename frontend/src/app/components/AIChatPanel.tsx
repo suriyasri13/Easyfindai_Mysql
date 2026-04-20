@@ -53,52 +53,52 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-6 bottom-6 w-[400px] h-[550px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 z-50 flex flex-col border border-gray-100 overflow-hidden transition-all transform duration-300">
+    <div className="fixed right-8 bottom-8 w-[420px] h-[600px] bg-white rounded-[2.5rem] shadow-2xl shadow-black/10 z-50 flex flex-col border border-black/5 overflow-hidden transition-all transform duration-500">
       
       {/* Premium Header */}
-      <div className="bg-gradient-to-r from-[#1A2538] to-[#2D3E5F] text-white p-4 flex items-center justify-between border-b border-gray-700">
-        <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-[#14B8A6] to-teal-600 p-2.5 rounded-full shadow-inner ring-2 ring-white/10">
-            <Bot size={22} className="text-white" />
+      <div className="bg-gradient-to-r from-primary to-blue-600 text-white p-6 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-md border border-white/20">
+            <Bot size={24} className="text-white" />
           </div>
           <div>
-            <h3 className="text-[16px] font-bold tracking-wide">EaseFind.ai Assistant</h3>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-              <p className="text-[11px] font-semibold text-teal-100 uppercase tracking-wider">Online</p>
+            <h3 className="text-lg font-bold tracking-tight">AI Assistant</h3>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <p className="text-xs font-bold text-white/80 uppercase tracking-widest">Active Now</p>
             </div>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="hover:bg-white/10 p-2 rounded-full transition-colors opacity-80 hover:opacity-100"
+          className="hover:bg-white/10 p-2.5 rounded-xl transition-all"
         >
-          <X size={20} />
+          <X size={22} />
         </button>
       </div>
 
       {/* Messages Window */}
-      <div className="flex-1 p-5 overflow-y-auto space-y-5 bg-gradient-to-b from-gray-50/50 to-white">
+      <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-slate-50/50">
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`flex items-end gap-2.5 text-sm ${msg.isUser ? 'flex-row-reverse' : 'flex-row'}`}
+            className={`flex items-end gap-3 text-sm ${msg.isUser ? 'flex-row-reverse' : 'flex-row'}`}
           >
             {/* Contextual Avatars */}
-            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-md ${
+            <div className={`flex-shrink-0 w-10 h-10 rounded-[1.25rem] flex items-center justify-center shadow-md transition-transform hover:scale-110 ${
               msg.isUser 
-                ? 'bg-gray-100 text-gray-500 border border-gray-200' 
-                : 'bg-gradient-to-br from-[#14B8A6] to-[#0D9488] text-white border border-teal-500/20'
+                ? 'bg-white text-foreground/50 border border-black/5' 
+                : 'bg-gradient-to-br from-primary to-blue-600 text-white'
             }`}>
-              {msg.isUser ? <User size={16} /> : <Bot size={16} />}
+              {msg.isUser ? <User size={20} /> : <Bot size={20} />}
             </div>
 
             {/* Asymmetrical Chat Bubbles */}
             <div
-              className={`max-w-[78%] p-3.5 shadow-sm whitespace-pre-line leading-relaxed text-[14.5px] ${
+              className={`max-w-[80%] p-5 shadow-sm whitespace-pre-line leading-relaxed text-[15px] font-medium transition-all ${
                 msg.isUser
-                  ? 'bg-[#1E2A44] text-white rounded-2xl rounded-br-sm'
-                  : 'bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-bl-sm font-medium'
+                  ? 'bg-primary text-white rounded-[1.75rem] rounded-br-none shadow-primary/20'
+                  : 'bg-white text-foreground rounded-[1.75rem] rounded-bl-none border border-black/5'
               }`}
             >
               {msg.text}
@@ -108,38 +108,38 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
 
         {/* Real-time Typing Indicator */}
         {isTyping && (
-          <div className="flex items-end gap-2.5 text-sm">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#14B8A6] to-[#0D9488] text-white flex items-center justify-center shadow-md">
-              <Bot size={16} />
+          <div className="flex items-end gap-3 text-sm">
+            <div className="flex-shrink-0 w-10 h-10 rounded-[1.25rem] bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center shadow-lg">
+              <Bot size={20} />
             </div>
-            <div className="bg-white border border-gray-100 text-gray-800 p-4 rounded-2xl rounded-bl-sm shadow-sm flex items-center gap-1.5 h-[46px]">
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce"></div>
+            <div className="bg-white p-5 rounded-[1.75rem] rounded-bl-none shadow-sm flex items-center gap-2 h-[56px] border border-black/5">
+              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce"></div>
             </div>
           </div>
         )}
 
-        <div ref={bottomRef} className="h-2" />
+        <div ref={bottomRef} className="h-4" />
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-white border-t border-gray-100 pb-5">
-        <div className="flex items-center gap-2 bg-gray-50/80 p-1.5 rounded-full border-2 border-gray-100 focus-within:border-teal-400 focus-within:bg-white transition-all duration-300">
+      <div className="p-6 bg-white border-t border-black/5 pb-8">
+        <div className="flex items-center gap-3 bg-slate-100 p-2 rounded-full border border-black/5 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all duration-500">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask me anything..."
-            className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-4 text-[15px] text-gray-700 placeholder:text-gray-400"
+            placeholder="Type your message..."
+            className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-6 text-base text-foreground placeholder:text-foreground/30 font-medium"
             disabled={isTyping}
           />
           <Button
             onClick={handleSend}
             disabled={!input.trim() || isTyping}
-            className="bg-gradient-to-r from-[#14B8A6] to-[#0D9488] hover:from-[#0D9488] hover:to-[#0F766E] text-white rounded-full w-[42px] h-[42px] p-0 flex-shrink-0 transition-transform active:scale-95 shadow-md shadow-teal-500/20 disabled:opacity-50 disabled:shadow-none"
+            className="bg-primary hover:bg-primary/90 text-white rounded-full w-[52px] h-[52px] p-0 flex-shrink-0 transition-all active:scale-90 shadow-xl shadow-primary/30"
           >
-            <Send size={18} className="translate-x-[1px]" />
+            <Send size={22} className="translate-x-[2px] -translate-y-[1px]" />
           </Button>
         </div>
       </div>

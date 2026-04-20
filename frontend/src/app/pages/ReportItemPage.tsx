@@ -35,6 +35,7 @@ export default function ReportItemPage() {
   const [hiddenDetail, setHiddenDetail] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<[number, number] | null>(null);
 
   useEffect(() => {
@@ -214,6 +215,9 @@ export default function ReportItemPage() {
       return;
     }
 
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const formData = new FormData();
     formData.append("itemType", itemType);
     formData.append("userId", user.userId.toString());  
@@ -244,25 +248,27 @@ export default function ReportItemPage() {
       resetForm();
     } catch (error: any) {
       toast.error(error.message || "Failed to report item");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto pb-12">
-      <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+    <div className="max-w-4xl mx-auto pb-12">
+      <div className="bg-white rounded-3xl shadow-sm p-12 border border-slate-100">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl text-[#1E2A44] font-bold tracking-tight">Report Item</h2>
+          <h2 className="text-3xl text-[#1e293b] font-bold">Report Item</h2>
         </div>
 
-        {/* Item Type Selection */}
+        {/* Item Type Selection - Exactly matching image */}
         <div className="flex gap-4 mb-8">
           <button
             type="button"
             onClick={() => setItemType('lost')}
-            className={`flex-1 py-4 rounded-xl transition-all font-bold text-base shadow-sm ${
+            className={`flex-1 py-4 rounded-xl transition-all font-bold text-[16px] ${
               itemType === 'lost'
-                ? 'bg-[#EF4444] text-white ring-4 ring-red-100'
-                : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border-2 border-transparent'
+                ? 'bg-[#ef4444] text-white'
+                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
             }`}
           >
             Report Lost Item
@@ -270,10 +276,10 @@ export default function ReportItemPage() {
           <button
             type="button"
             onClick={() => setItemType('found')}
-            className={`flex-1 py-4 rounded-xl transition-all font-bold text-base shadow-sm ${
+            className={`flex-1 py-4 rounded-xl transition-all font-bold text-[16px] ${
               itemType === 'found'
-                ? 'bg-[#3B82F6] text-white ring-4 ring-blue-100'
-                : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border-2 border-transparent'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
             }`}
           >
             Report Found Item
@@ -281,88 +287,92 @@ export default function ReportItemPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label htmlFor="itemName" className="text-gray-700 text-base">Item Name *</Label>
-            <Input
-              id="itemName"
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              placeholder="e.g., Laptop, Wallet, Keys"
-              className="mt-1.5 border-2 border-gray-200 focus:border-[#14B8A6] text-base"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+            <div>
+              <Label htmlFor="itemName" className="text-[#1e293b] text-[15px] font-bold mb-2 block">Item Name *</Label>
+              <Input
+                id="itemName"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                placeholder="e.g., Laptop, Wallet, Keys"
+                className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="category" className="text-[#1e293b] text-[15px] font-bold mb-2 block">Category *</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat} className="focus:bg-slate-100">
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div>
-            <Label htmlFor="category" className="text-gray-700 text-base">Category *</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="mt-1.5 border-2 border-gray-200 focus:border-[#14B8A6] text-base">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="description" className="text-gray-700 text-base">Description *</Label>
+            <Label htmlFor="description" className="text-[#1e293b] text-[15px] font-bold mb-2 block">Description *</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Provide detailed description..."
-              className="mt-1.5 border-2 border-gray-200 focus:border-[#14B8A6] min-h-[100px] text-base"
+              className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 min-h-[140px] text-[15px] p-4 rounded-xl"
             />
           </div>
 
-          <div>
-            <Label htmlFor="contactInfo" className="text-gray-700 text-base">Contact Information *</Label>
-            <Input
-              id="contactInfo"
-              value={contactInfo}
-              onChange={(e) => setContactInfo(e.target.value)}
-              placeholder="Email or Phone Number"
-              className="mt-1.5 border-2 border-gray-200 focus:border-[#14B8A6] text-base"
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="contactInfo" className="text-[#1e293b] text-[15px] font-bold mb-2 block">Contact Information *</Label>
+              <Input
+                id="contactInfo"
+                value={contactInfo}
+                onChange={(e) => setContactInfo(e.target.value)}
+                placeholder="Email or Phone Number"
+                className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="date" className="text-gray-700 text-base">Date *</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-1.5 border-2 border-gray-200 focus:border-[#14B8A6] text-base"
-            />
+            <div>
+              <Label htmlFor="date" className="text-[#1e293b] text-[15px] font-bold mb-2 block">Date *</Label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
+              />
+            </div>
           </div>
 
           {/* Location Section */}
-          <div>
-            <Label className="text-gray-700 text-base">
+          <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-200">
+            <Label className="text-[#1e293b] text-base font-bold mb-6 block">
               {itemType === 'lost' ? 'Last Known Location *' : 'Current Storage Location *'}
             </Label>
-            <div className="mt-2 space-y-2">
+            <div className="space-y-6">
               <Button
                 type="button"
                 onClick={handleEnableLocation}
                 disabled={isFetchingLocation}
                 className={`${
                   itemType === 'lost' 
-                    ? 'bg-[#EF4444] hover:bg-[#DC2626] text-white' 
-                    : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white'
-                } text-base font-medium disabled:opacity-70`}
+                    ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-200' 
+                    : 'bg-blue-500 hover:bg-blue-600 shadow-blue-200'
+                } text-white font-bold py-7 px-8 rounded-2xl transition-all disabled:opacity-70 shadow-lg`}
               >
-                <MapPin size={18} className="mr-2" />
+                <MapPin size={22} className="mr-3" />
                 {isFetchingLocation ? 'Fetching Address...' : 'Enable Current Location'}
               </Button>
               
               {itemType === 'lost' ? (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Input
                     value={location}
                     onChange={(e) => {
@@ -370,9 +380,9 @@ export default function ReportItemPage() {
                       setUseCurrentLocation(false);
                     }}
                     placeholder="Enter last known location (e.g., Classroom 101)"
-                    className="border-2 border-gray-200 focus:border-[#14B8A6] text-base"
+                    className="bg-white border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-blue-500/10 py-7 text-base rounded-2xl shadow-sm"
                   />
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-3">
                     {campusLocations.map((loc) => (
                       <button
                         key={loc}
@@ -381,7 +391,7 @@ export default function ReportItemPage() {
                           setLocation(loc);
                           setUseCurrentLocation(false);
                         }}
-                        className="px-3 py-1 bg-gray-100 hover:bg-teal-50 text-teal-700 text-xs sm:text-sm rounded-full border border-gray-200 hover:border-teal-300 transition-colors"
+                        className="px-5 py-2.5 bg-white hover:bg-blue-50 text-slate-600 hover:text-blue-600 text-sm rounded-xl border border-slate-200 hover:border-blue-500 transition-all font-bold shadow-sm"
                       >
                         {loc}
                       </button>
@@ -389,9 +399,9 @@ export default function ReportItemPage() {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3 mt-3">
+                <div className="space-y-6">
                   <div>
-                    <Label className="text-sm text-gray-500 font-medium">Found Location</Label>
+                    <Label className="text-xs text-slate-400 font-black mb-3 block uppercase tracking-widest">Found Location</Label>
                     <Input
                       value={location}
                       onChange={(e) => {
@@ -399,9 +409,9 @@ export default function ReportItemPage() {
                         setUseCurrentLocation(false);
                       }}
                       placeholder="Where was this item found? (Optional)"
-                      className="border-2 border-gray-200 focus:border-[#14B8A6] text-base mb-2"
+                      className="bg-white border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-blue-500/10 py-7 text-base mb-4 rounded-2xl shadow-sm"
                     />
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-3">
                       {campusLocations.map((loc) => (
                         <button
                           key={loc}
@@ -410,7 +420,7 @@ export default function ReportItemPage() {
                             setLocation(loc);
                             setUseCurrentLocation(false);
                           }}
-                          className="px-3 py-1 bg-gray-100 hover:bg-teal-50 text-teal-700 text-xs sm:text-sm rounded-full border border-gray-200 hover:border-teal-300 transition-colors"
+                          className="px-5 py-2.5 bg-white hover:bg-blue-50 text-slate-600 hover:text-blue-600 text-sm rounded-xl border border-slate-200 hover:border-blue-500 transition-all font-bold shadow-sm"
                         >
                           {loc}
                         </button>
@@ -418,31 +428,28 @@ export default function ReportItemPage() {
                     </div>
                   </div>
                   <div>
-                    <Label className="text-sm text-gray-500 font-medium">Storage Location *</Label>
+                    <Label className="text-xs text-slate-400 font-black mb-3 block uppercase tracking-widest">Storage Location *</Label>
                     <Input
                       value={storageLocation}
                       onChange={(e) => setStorageLocation(e.target.value)}
                       placeholder="Enter current storage location"
-                      className="border-2 border-gray-200 focus:border-[#14B8A6] text-base"
+                      className="bg-white border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-blue-500/10 py-7 text-base rounded-2xl shadow-sm"
                     />
                   </div>
                 </div>
               )}
 
               {useCurrentLocation && location && (
-                <p className="text-xs text-blue-600 mt-1">
-                  📍 Location fetched automatically. You can edit it manually above if it is incorrect.
+                <p className="text-sm text-blue-600 mt-2 font-bold flex items-center gap-2">
+                  <span className="animate-pulse">📍</span> Location fetched automatically
                 </p>
               )}
 
-              {/* Visual Map showing where you are standing (Google Maps Picker Style) */}
               {currentCoords && (
-                <div className="mt-4 rounded-xl overflow-hidden shadow-sm border-2 border-[#3B82F6] relative">
-                  <div id="mini-map" style={{ height: '220px', width: '100%', zIndex: 1, backgroundColor: '#f3f4f6' }}></div>
-                  
-                  {/* Fixed Center Pin that doesn't move */}
+                <div className="mt-8 rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white relative">
+                  <div id="mini-map" style={{ height: '280px', width: '100%', zIndex: 1, backgroundColor: '#f1f5f9' }}></div>
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full pointer-events-none z-[1000]">
-                    <MapPin size={42} className="text-red-500 drop-shadow-lg animate-bounce" fill="white" />
+                    <MapPin size={48} className="text-rose-500 drop-shadow-2xl animate-bounce" fill="white" />
                   </div>
                 </div>
               )}
@@ -450,44 +457,46 @@ export default function ReportItemPage() {
           </div>
 
           {/* Confidential Custody Protocol */}
-          <div className="border-2 border-gray-200 rounded-xl p-5 bg-gray-50">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🔐</span>
-                <Label className="text-[#1E2A44] text-base font-semibold">
-                  Enable Confidential Custody Protocol
+          <div className={`rounded-[2rem] p-10 border transition-all ${isConfidential ? 'bg-blue-50/50 border-blue-200 shadow-lg' : 'bg-slate-50 border-slate-200'}`}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-2xl ${isConfidential ? 'bg-blue-500 text-white shadow-lg' : 'bg-slate-200 text-slate-500'}`}>
+                  <span className="text-xl">🔐</span>
+                </div>
+                <Label className="text-[#1e293b] text-xl font-bold">
+                  Confidential Custody Protocol
                 </Label>
               </div>
               <input
                 type="checkbox"
                 checked={isConfidential}
                 onChange={(e) => setIsConfidential(e.target.checked)}
-                className="w-5 h-5 accent-[#14B8A6]"
+                className="w-7 h-7 accent-blue-600 cursor-pointer"
               />
             </div>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-slate-500 mb-8 leading-relaxed font-medium">
               Add extra security for valuable or sensitive items. Requires verification for claims.
             </p>
             
             {isConfidential && (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-top-4 duration-500">
                 <div>
-                  <Label className="text-gray-700 text-base">Unique Identifier *</Label>
+                  <Label className="text-[#1e293b] text-base font-bold mb-3 block">Unique Identifier *</Label>
                   <Input
                     value={uniqueIdentifier}
                     onChange={(e) => setUniqueIdentifier(e.target.value)}
                     placeholder="e.g., Serial number, unique marking"
-                    className="mt-1.5 border-2 border-gray-200 focus:border-[#14B8A6] text-base"
+                    className="bg-white border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-blue-500/10 py-7 text-base rounded-2xl shadow-sm"
                   />
-                  <p className="text-xs text-gray-500 mt-1">This will be hidden from public view</p>
+                  <p className="text-xs text-slate-400 mt-3 font-bold">This will be hidden from public view</p>
                 </div>
                 <div>
-                  <Label className="text-gray-700 text-base">Hidden Detail (Optional)</Label>
+                  <Label className="text-[#1e293b] text-base font-bold mb-3 block">Hidden Detail (Optional)</Label>
                   <Textarea
                     value={hiddenDetail}
                     onChange={(e) => setHiddenDetail(e.target.value)}
                     placeholder="Additional verification details..."
-                    className="mt-1.5 border-2 border-gray-200 focus:border-[#14B8A6] min-h-[80px] text-base"
+                    className="bg-white border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-blue-500/10 min-h-[100px] text-base p-5 rounded-2xl shadow-sm"
                   />
                 </div>
               </div>
@@ -495,13 +504,13 @@ export default function ReportItemPage() {
           </div>
 
           {/* Image Upload */}
-          <div>
-            <Label className="text-gray-700 text-base">Upload Image (JPG/PNG, Max 5MB)</Label>
+          <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-200">
+            <Label className="text-[#1e293b] text-base font-bold mb-6 block">Upload Image (JPG/PNG, Max 5MB)</Label>
             <div className="mt-2">
               {!imagePreview ? (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                  <Upload size={32} className="text-gray-400 mb-2" />
-                  <span className="text-base text-gray-500">Click to upload image</span>
+                <label className="flex flex-col items-center justify-center w-full h-48 border-4 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-white hover:border-blue-400 transition-all group bg-slate-50 shadow-sm">
+                  <Upload size={48} className="text-slate-300 mb-4 group-hover:text-blue-500 transition-colors" />
+                  <span className="text-lg text-slate-400 font-bold group-hover:text-slate-600">Click to upload image</span>
                   <input
                     type="file"
                     accept="image/jpeg,image/png"
@@ -510,42 +519,45 @@ export default function ReportItemPage() {
                   />
                 </label>
               ) : (
-                <div className="relative">
+                <div className="relative group rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-48 object-cover rounded-xl"
+                    className="w-full h-80 object-cover"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setImagePreview(null)}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() => setImagePreview(null)}
+                      className="bg-rose-500 text-white p-5 rounded-full hover:bg-rose-600 transition-all transform hover:scale-110 shadow-2xl"
+                    >
+                      <X size={28} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-6 pt-8">
             <Button
               type="button"
               onClick={resetForm}
               variant="outline"
-              className="flex-1 py-6 border-2 border-gray-200 text-gray-600 hover:bg-gray-50 font-bold text-base transition-all"
+              className="flex-1 py-8 border-2 border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold text-xl transition-all rounded-[1.5rem] shadow-sm"
             >
               Clear Form
             </Button>
             <Button
               type="submit"
-              className={`flex-[2] py-6 text-white font-bold text-base shadow-md hover:shadow-xl transition-all ${
+              disabled={isSubmitting}
+              className={`flex-[2] py-8 text-white font-bold text-xl shadow-2xl transition-all disabled:opacity-70 rounded-[1.5rem] ${
                 itemType === 'lost'
-                  ? 'bg-[#EF4444] hover:bg-[#DC2626] shadow-red-100'
-                  : 'bg-[#3B82F6] hover:bg-[#2563EB] shadow-blue-100'
+                  ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-200'
+                  : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
               }`}
             >
-              Submit {itemType === 'lost' ? 'Lost' : 'Found'} Item Report
+              {isSubmitting ? 'Submitting...' : `Submit ${itemType === 'lost' ? 'Lost' : 'Found'} Item Report`}
             </Button>
           </div>
         </form>

@@ -29,13 +29,11 @@ export default function GISMap() {
     // Initialize map focusing on the campus center
     const map = L.map("map").setView([12.9725, 77.5960], 16);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap",
+    // Using CartoDB Voyager for a more colorful, vibrant map background
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      attribution: "© OpenStreetMap © CartoDB",
     }).addTo(map);
 
-    // Fix for Leaflet default icon paths missing in some bundling setups
-    // Though we are mostly using circle markers, just in case
-    
     setMapInstance(map);
 
     return () => {
@@ -80,20 +78,22 @@ export default function GISMap() {
           }
 
           const isLost = item.status === "lost";
-          const color = isLost ? "#EF4444" : "#3B82F6"; // Red for lost, Blue for found
+          const color = isLost ? "#ef4444" : "#2563eb"; // High contrast red and blue
 
           L.circleMarker([lat, lng], {
-            radius: isLost ? 8 : 6,
+            radius: isLost ? 9 : 7,
             color: color,
             fillColor: color,
-            fillOpacity: 0.8,
+            fillOpacity: 0.7,
             weight: 2
           })
             .addTo(layerGroup)
             .bindPopup(
-              `<b>${item.itemName}</b><br>
-               <span style="color: ${color}; font-weight: bold;">${item.status.toUpperCase()}</span><br>
-               <b>Location:</b> ${item.location}`
+              `<div style="color: #1e293b; font-family: sans-serif; padding: 5px;">
+                <b style="font-size: 16px; display: block; margin-bottom: 4px;">${item.itemName}</b>
+                <span style="color: ${color}; font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; background: ${isLost ? '#fee2e2' : '#dbeafe'}; padding: 2px 6px; rounded: 4px;">${item.status.toUpperCase()}</span>
+                <p style="margin-top: 8px; color: #64748b; font-size: 12px;"><b>Location:</b> ${item.location}</p>
+               </div>`
             );
 
           // Add to Hotspot Heatmap only if it is a LOST item
@@ -102,12 +102,18 @@ export default function GISMap() {
           }
         });
 
-        // Generate the heatmap layer
+        // Generate the heatmap layer with a vibrant, high-intelligence color spectrum
         (L as any).heatLayer(heatPoints, {
-          radius: 25,
-          blur: 15,
+          radius: 45,
+          blur: 25,
           maxZoom: 17,
-          gradient: { 0.4: 'yellow', 0.6: 'orange', 1: 'red' }
+          gradient: { 
+            0.1: '#3b82f6', // Bright Blue
+            0.3: '#22c55e', // Intelligence Green
+            0.5: '#eab308', // Warning Yellow
+            0.7: '#f97316', // Alert Orange
+            1.0: '#ef4444'  // High Frequency Red
+          }
         }).addTo(layerGroup);
 
       } catch (err) {
@@ -119,19 +125,25 @@ export default function GISMap() {
   }, [mapInstance]);
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-[#1E2A44] mb-2">
-        Campus Loss Hotspot Map
-      </h2>
-      <p className="text-gray-600 mb-6">
-        Real-time interactive Google Maps-style view of all reported lost items across campus. Red hotspots indicate areas with many lost items.
-      </p>
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h2 className="text-4xl font-bold text-[#1e293b] tracking-tight">
+            Campus Intelligence Map
+          </h2>
+          <p className="text-slate-500 mt-2 text-lg max-w-3xl font-medium">
+            Visual intelligence showing all reported items. Red hotspots indicate high-frequency loss areas requiring attention.
+          </p>
+        </div>
+      </div>
 
-      <div 
-        id="map" 
-        className="rounded-2xl shadow-xl border-4 border-white" 
-        style={{ height: "600px", width: "100%", zIndex: 1 }}
-      ></div>
+      <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
+        <div 
+          id="map" 
+          className="rounded-[1.5rem] overflow-hidden" 
+          style={{ height: "650px", width: "100%", zIndex: 1, backgroundColor: '#f8fafc' }}
+        ></div>
+      </div>
     </div>
   );
 }
