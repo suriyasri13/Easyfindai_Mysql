@@ -50,9 +50,9 @@ export default function LandingPage() {
             <span>AI-Driven Discovery Neural Network</span>
           </div>
           
-          <h1 className="text-7xl lg:text-9xl font-black text-[#1e293b] tracking-tighter mb-10 leading-[0.9]">
-            RECOVER WHAT <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-700">MATTERS MOST.</span>
+          <h1 className="text-5xl lg:text-7xl font-black text-[#1e293b] tracking-tighter mb-10 leading-[1.1]">
+            Recover what matters <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-700">faster than ever.</span>
           </h1>
           
           <p className="text-xl lg:text-2xl text-slate-500 mb-16 max-w-3xl mx-auto leading-relaxed font-medium">
@@ -148,6 +148,3 @@ export default function LandingPage() {
     </div>
   );
 }
-  );
-}
-
