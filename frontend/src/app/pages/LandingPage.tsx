@@ -33,8 +33,6 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-10">
             <a href="#intelligence" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">Intelligence</a>
             <a href="#protocols" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">Protocols</a>
-            <Link to="/dashboard/gis-map" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">Hotspots</Link>
-            <Link to="/dashboard/help" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">Verification</Link>
           </div>
 
           <div className="flex items-center gap-6">
