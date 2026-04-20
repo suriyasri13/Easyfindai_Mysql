@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#f8fafc]">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#e0f2fe]">
       {/* Top Accent Line */}
       <div className="fixed top-0 left-0 w-full h-2 bg-blue-600 z-[60]"></div>
 
@@ -117,7 +117,5 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
     </div>
-  );
-}
   );
 }
