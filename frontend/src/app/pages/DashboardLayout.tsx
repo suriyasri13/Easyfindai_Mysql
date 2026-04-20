@@ -151,7 +151,7 @@ export default function DashboardLayout() {
           {/* Right: Icons */}
           <div className="flex items-center gap-6">
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/')}
               className="text-white/90 hover:text-white transition-all"
               title="Home"
             >
