@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Search, ShieldCheck, Zap, ArrowRight, Brain } from 'lucide-react';
+import TextType from '../components/ui/TextType';
 
 export default function LandingPage() {
   return (
@@ -52,7 +53,15 @@ export default function LandingPage() {
           
           <h1 className="text-5xl lg:text-7xl font-black text-[#1e293b] tracking-tighter mb-10 leading-[1.1]">
             Recover what matters <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-700">faster than ever.</span>
+            <TextType 
+              text={["faster than ever.", "with AI precision.", "across the campus.", "safely and securely."]}
+              typingSpeed={70}
+              pauseDuration={2000}
+              deletingSpeed={40}
+              showCursor={true}
+              cursorCharacter="|"
+              className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-700"
+            />
           </h1>
           
           <p className="text-xl lg:text-2xl text-slate-500 mb-16 max-w-3xl mx-auto leading-relaxed font-medium">
