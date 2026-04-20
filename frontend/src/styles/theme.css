@@ -106,3 +106,11 @@
   animation: marker-pulse 2s ease-in-out infinite;
   filter: drop-shadow(0 0 5px currentColor);
 }
+@keyframes scan {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(100vh); }
+}
+
+.animate-scan {
+  animation: scan 8s linear infinite;
+}

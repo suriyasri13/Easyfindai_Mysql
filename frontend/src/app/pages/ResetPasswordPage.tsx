@@ -74,13 +74,38 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#f8fafc]">
 
-      {/* Floating Lines Animation */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <svg className="absolute w-full h-full opacity-[0.05] animate-wave" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path d="M0,20 Q25,10 50,20 T100,20" fill="none" stroke="#2563eb" strokeWidth="0.1" />
-          <path d="M0,50 Q25,40 50,50 T100,50" fill="none" stroke="#2563eb" strokeWidth="0.1" />
-          <path d="M0,80 Q25,70 50,80 T100,80" fill="none" stroke="#2563eb" strokeWidth="0.1" />
+      {/* AI Search & Connect Animation Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-[#f8fafc]">
+        {/* Animated Blobs for depth */}
+        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-[120px] animate-blob"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-400/10 rounded-full blur-[120px] animate-blob animation-delay-2000"></div>
+
+        {/* The Neural Grid */}
+        <svg className="absolute w-full h-full opacity-[0.1]" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2563eb" strokeWidth="0.5"/>
+            </pattern>
+            <radialGradient id="pulse" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+              <stop offset="0%" stopColor="#2563eb" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+          
+          {/* Animated Scanning Line */}
+          <rect width="100%" height="2" fill="#2563eb" className="animate-scan opacity-20" />
+          
+          {/* Floating Nodes */}
+          <circle cx="20%" cy="30%" r="3" fill="#2563eb" className="animate-pulse" />
+          <circle cx="80%" cy="20%" r="2" fill="#2563eb" className="animate-pulse delay-700" />
+          <circle cx="40%" cy="70%" r="4" fill="#2563eb" className="animate-pulse delay-1000" />
+          <circle cx="70%" cy="80%" r="3" fill="#2563eb" className="animate-pulse delay-300" />
+          <circle cx="10%" cy="90%" r="2" fill="#2563eb" className="animate-pulse delay-500" />
         </svg>
+
+        {/* Radar Pulse Effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[url(#pulse)] opacity-10 animate-ping"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10 px-6 py-12">
