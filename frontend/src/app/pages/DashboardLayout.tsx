@@ -116,7 +116,7 @@ export default function DashboardLayout() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen relative text-slate-900 overflow-x-hidden bg-[#e0f2fe]">
+    <div className="min-h-screen relative text-slate-900 overflow-x-hidden bg-[#f8fafc]">
       {/* Top Navigation Bar - Exactly as in screenshot */}
       <nav className="sticky top-0 z-40 bg-[#1e293b] h-[72px] shadow-sm">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between h-full px-8">
