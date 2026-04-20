@@ -99,14 +99,14 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-md relative z-10 px-6">
-        <div className="bg-[#1e293b] p-10 rounded-t-[2.5rem] text-center shadow-2xl">
+        <div className="bg-[#1e293b] py-8 px-10 rounded-t-[2.5rem] text-center shadow-2xl">
           <h1 className="text-4xl font-black mb-2 tracking-tighter text-white">EaseFind.AI</h1>
           <p className="text-blue-200 text-sm font-bold uppercase tracking-widest">
             Intelligence Platform
           </p>
         </div>
 
-        <div className="bg-white p-10 rounded-b-[2.5rem] shadow-2xl border border-slate-100">
+        <div className="bg-white px-10 py-8 rounded-b-[2.5rem] shadow-2xl border border-slate-100">
           <div className="flex gap-4 mb-10 bg-slate-50 p-2 rounded-2xl">
             <button
               type="button"
