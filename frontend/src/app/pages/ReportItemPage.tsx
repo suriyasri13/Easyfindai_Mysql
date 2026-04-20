@@ -254,14 +254,14 @@ export default function ReportItemPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-12">
-      <div className="bg-white rounded-3xl shadow-sm p-12 border border-slate-100">
+    <div className="max-w-4xl mx-auto pb-12 relative z-10">
+      <div className="glass rounded-[3.5rem] shadow-2xl p-12 border border-white/60">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl text-[#1e293b] font-bold">Report Item</h2>
         </div>
 
         {/* Item Type Selection - Exactly matching image */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-4 mb-10 bg-slate-100/50 p-2 rounded-2xl border border-white/40">
           <button
             type="button"
             onClick={() => setItemType('lost')}
@@ -352,7 +352,7 @@ export default function ReportItemPage() {
           </div>
 
           {/* Location Section */}
-          <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-200">
+          <div className="bg-white/40 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/60 shadow-xl shadow-blue-500/[0.02]">
             <Label className="text-[#1e293b] text-base font-bold mb-6 block">
               {itemType === 'lost' ? 'Last Known Location *' : 'Current Storage Location *'}
             </Label>
@@ -457,7 +457,7 @@ export default function ReportItemPage() {
           </div>
 
           {/* Confidential Custody Protocol */}
-          <div className={`rounded-[2rem] p-10 border transition-all ${isConfidential ? 'bg-blue-50/50 border-blue-200 shadow-lg' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`rounded-[2.5rem] p-10 border transition-all duration-500 ${isConfidential ? 'bg-blue-50/60 border-blue-300 shadow-xl shadow-blue-500/10' : 'bg-white/40 border-white/60 shadow-lg'} backdrop-blur-md`}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <div className={`p-3 rounded-2xl ${isConfidential ? 'bg-blue-500 text-white shadow-lg' : 'bg-slate-200 text-slate-500'}`}>
@@ -504,7 +504,7 @@ export default function ReportItemPage() {
           </div>
 
           {/* Image Upload */}
-          <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-200">
+          <div className="bg-white/40 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/60 shadow-lg">
             <Label className="text-[#1e293b] text-base font-bold mb-6 block">Upload Image (JPG/PNG, Max 5MB)</Label>
             <div className="mt-2">
               {!imagePreview ? (

@@ -117,8 +117,19 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen relative text-slate-900 overflow-x-hidden bg-[#f8fafc]">
+      {/* Floating Background Elements */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Animated Blobs */}
+        <div className="absolute top-[-5%] left-[-5%] w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-[120px] animate-blob"></div>
+        <div className="absolute bottom-[5%] right-[-5%] w-[700px] h-[700px] bg-indigo-400/10 rounded-full blur-[120px] animate-blob animation-delay-2000"></div>
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" 
+             style={{ backgroundImage: 'radial-gradient(#2563eb 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }}>
+        </div>
+      </div>
       {/* Top Navigation Bar - Exactly as in screenshot */}
-      <nav className="sticky top-0 z-40 bg-[#1e293b] h-[72px] shadow-sm">
+      <nav className="sticky top-0 z-40 bg-[#1e293b]/95 backdrop-blur-xl h-[72px] shadow-sm border-b border-white/5">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between h-full px-8">
           {/* Left: Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => navigate('/dashboard')}>
@@ -195,7 +206,7 @@ export default function DashboardLayout() {
         {/* Sidebar - Light Theme as in image */}
         <aside
           className={`
-            fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] bg-white z-30 transition-all duration-300 border-r border-slate-200
+            fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] bg-white/70 backdrop-blur-xl z-30 transition-all duration-300 border-r border-slate-200/50
             ${isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 w-64'}
           `}
         >

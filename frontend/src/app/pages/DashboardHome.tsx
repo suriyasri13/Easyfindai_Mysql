@@ -41,7 +41,7 @@ export default function DashboardHome() {
   return (
     <div className="space-y-10">
       {/* Welcome Section */}
-      <div className="bg-[#1e293b] text-white p-12 rounded-[2rem] shadow-2xl relative overflow-hidden group">
+      <div className="bg-[#1e293b]/90 backdrop-blur-xl text-white p-12 rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700"></div>
         <div className="relative z-10">
           <h2 className="text-4xl font-bold mb-4 tracking-tight">Welcome back, {user?.fullName}!</h2>
@@ -54,7 +54,7 @@ export default function DashboardHome() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {stats.map((stat, idx) => (
-          <div key={idx} className="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-100 hover:scale-105 transition-all duration-300 group">
+          <div key={idx} className="glass p-8 rounded-[2rem] shadow-xl border border-white/60 hover:scale-105 transition-all duration-300 group">
             <div className={`w-14 h-14 ${stat.color} rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:shadow-md transition-all`}>
               <stat.icon size={28} />
             </div>
@@ -82,14 +82,14 @@ export default function DashboardHome() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white p-10 rounded-[2rem] shadow-xl border border-slate-100">
+      <div className="glass p-10 rounded-[2.5rem] shadow-xl border border-white/60">
         <div className="flex items-center justify-between mb-8">
           <h3 className="text-2xl text-[#1e293b] font-bold tracking-tight">Recent Activity</h3>
-          <Link to="/dashboard/notifications" className="text-blue-600 font-bold hover:bg-blue-50 px-4 py-2 rounded-xl transition-all">View All</Link>
+          <Link to="/dashboard/notifications" className="text-blue-600 font-bold hover:bg-blue-50/50 px-4 py-2 rounded-xl transition-all">View All</Link>
         </div>
 
         <div className="space-y-6">
-          <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
+          <div className="flex items-center gap-6 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 hover:bg-white hover:shadow-lg transition-all group">
             <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm">
               <CheckCircle size={28} />
             </div>
@@ -102,7 +102,7 @@ export default function DashboardHome() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
+          <div className="flex items-center gap-6 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 hover:bg-white hover:shadow-lg transition-all group">
             <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
               <Search size={28} />
             </div>
@@ -115,7 +115,7 @@ export default function DashboardHome() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
+          <div className="flex items-center gap-6 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 hover:bg-white hover:shadow-lg transition-all group">
             <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center shadow-sm">
               <Package size={28} />
             </div>
