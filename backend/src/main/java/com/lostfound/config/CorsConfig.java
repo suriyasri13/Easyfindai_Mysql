@@ -28,7 +28,7 @@ public class CorsConfig {
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
                 registry.addResourceHandler("/uploads/**")
-                        .addResourceLocations("file:///C:/Users/HP/OneDrive/Desktop/smart-lost-found-system-main/backend/uploads/");
+                        .addResourceLocations("file:///C:/Users/HP/OneDrive/Desktop/smart-lost-found-system-main - Copy/backend/uploads/");
             }
         };
     }

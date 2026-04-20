@@ -25,6 +25,9 @@ public class Match {
     @Column(length = 500)
     private String matchReason;
 
+    @Column(name = "security_key")
+    private String securityKey;
+
     // Getters & Setters
     public Long getMatchId() {
         return matchId;
@@ -40,6 +43,14 @@ public class Match {
 
     public void setMatchReason(String matchReason) {
         this.matchReason = matchReason;
+    }
+
+    public String getSecurityKey() {
+        return securityKey;
+    }
+
+    public void setSecurityKey(String securityKey) {
+        this.securityKey = securityKey;
     }
 
     public LostItem getLostItem() {

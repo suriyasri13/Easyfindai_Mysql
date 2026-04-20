@@ -171,15 +171,22 @@ public class SmartMatchService {
         match.setStatus("PENDING");
         match.setConfidenceScore(confidence);
         match.setMatchReason(reason);
+        
+        String securityKey = (lost.getUniqueIdentifier() != null && !lost.getUniqueIdentifier().trim().isEmpty()) 
+                ? lost.getUniqueIdentifier() : found.getUniqueIdentifier();
+        if (securityKey == null || securityKey.trim().isEmpty()) {
+            securityKey = java.util.UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        }
+        match.setSecurityKey(securityKey);
+        
         match = matchRepo.save(match);
 
-        notifyUser(lost.getUser().getUserId(), match.getMatchId(), "We found an item that might be your lost " + lost.getItemName() + "!");
-        notifyUser(found.getFinder().getUserId(), match.getMatchId(), "Your found item '" + found.getItemName() + "' matches a lost report!");
+        notifyUser(lost.getUser().getUserId(), match.getMatchId(), "We found an item that might be your lost " + lost.getItemName() + "! Security Key: " + match.getSecurityKey());
+        notifyUser(found.getFinder().getUserId(), match.getMatchId(), "Your found item '" + found.getItemName() + "' matches a lost report! Security Key: " + match.getSecurityKey());
 
         try {
-            String securityKey = (lost.getUniqueIdentifier() != null) ? lost.getUniqueIdentifier() : found.getUniqueIdentifier();
-            emailService.sendMatchAlert(lost.getUser().getEmail(), lost.getUser().getName(), lost.getItemName(), securityKey);
-            emailService.sendMatchAlert(found.getFinder().getEmail(), found.getFinder().getName(), found.getItemName(), securityKey);
+            emailService.sendMatchAlert(lost.getUser().getEmail(), lost.getUser().getName(), lost.getItemName(), match.getSecurityKey());
+            emailService.sendMatchAlert(found.getFinder().getEmail(), found.getFinder().getName(), found.getItemName(), match.getSecurityKey());
         } catch (Exception e) {
             System.err.println("AI ERROR: Failed to send Gmail alerts: " + e.getMessage());
         }
@@ -197,7 +204,7 @@ public class SmartMatchService {
         notification.setTitle("New Potential Match!");
         notification.setMessage(message);
         notification.setActionText("View Match");
-        notification.setActionUrl("/dashboard/match-results");
+        notification.setActionUrl("/dashboard/match-results?matchId=" + matchId);
         notification.setCreatedAt(java.time.LocalDateTime.now());
         notificationRepo.save(notification);
         messagingTemplate.convertAndSend("/topic/user_" + userId, notification);

@@ -29,22 +29,26 @@ public class ItemController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private com.lostfound.service.SmartMatchService matchService;
+
     // ---------------- LOST ITEMS ----------------
 
     @PostMapping(value = "/lost-items", consumes = "multipart/form-data")
     public ResponseEntity<?> addLostItemMultipart(
-            @RequestParam("itemName") String itemName,
-            @RequestParam("category") String category,
-            @RequestParam("description") String description,
-            @RequestParam("contactInfo") String contactInfo,
-            @RequestParam("dateLost") String dateLost,
-            @RequestParam("location") String location,
-            @RequestParam("userId") Long userId,
+            @RequestParam(value = "itemName", required = false) String itemName,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "contactInfo", required = false) String contactInfo,
+            @RequestParam(value = "dateLost", required = false) String dateLost,
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "isConfidential", defaultValue = "false") boolean isConfidential,
             @RequestParam(value = "uniqueIdentifier", required = false) String uniqueIdentifier,
             @RequestParam(value = "hiddenDetail", required = false) String hiddenDetail,
             @RequestParam(value = "image", required = false) MultipartFile image
     ) {
+        System.out.println("DEBUG: addLostItemMultipart called with userId: " + userId + ", itemName: " + itemName);
         try {
             LostItem item = new LostItem();
             item.setItemName(itemName);
@@ -70,8 +74,9 @@ public class ItemController {
                 item.setImagePath(fileName);
             }
 
+            System.out.println("DEBUG Submission: Attempting to save item to database...");
             LostItem savedItem = lostItemService.saveLostItem(item);
-            System.out.println("Backend: SUCCESS saving Lost Item Id: " + savedItem.getItemId());
+            System.out.println("DEBUG Submission: SUCCESS saving Lost Item Id: " + savedItem.getItemId());
 
             // --- AUTOMATED MATCHING HOOK ---
             try {
@@ -83,8 +88,10 @@ public class ItemController {
 
             return ResponseEntity.ok(savedItem);
         } catch (Exception e) {
+            System.err.println("CRITICAL ERROR in addLostItem: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body("Error saving lost item: " + e.getMessage());
+            String errorMessage = "Error saving lost item: " + e.getClass().getSimpleName() + " - " + e.getMessage();
+            return ResponseEntity.status(500).body(errorMessage);
         }
     }
 
@@ -95,23 +102,21 @@ public class ItemController {
 
     // ---------------- FOUND ITEMS ----------------
 
-    @Autowired
-    private com.lostfound.service.MatchService matchService;
-
     @PostMapping(value = "/found-items", consumes = "multipart/form-data")
     public ResponseEntity<?> addFoundItemMultipart(
-            @RequestParam("itemName") String itemName,
-            @RequestParam("category") String category,
-            @RequestParam("description") String description,
-            @RequestParam("contactInfo") String contactInfo,
-            @RequestParam("dateLost") String dateLost, // using same param name from frontend
-            @RequestParam("location") String location,
-            @RequestParam("userId") Long userId,
+            @RequestParam(value = "itemName", required = false) String itemName,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "contactInfo", required = false) String contactInfo,
+            @RequestParam(value = "dateLost", required = false) String dateLost,
+            @RequestParam(value = "location", required = false) String location,
+            @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "isConfidential", defaultValue = "false") boolean isConfidential,
             @RequestParam(value = "uniqueIdentifier", required = false) String uniqueIdentifier,
             @RequestParam(value = "hiddenDetail", required = false) String hiddenDetail,
             @RequestParam(value = "image", required = false) MultipartFile image
     ) {
+        System.out.println("DEBUG: addFoundItemMultipart called with userId: " + userId + ", itemName: " + itemName);
         try {
             System.out.println("Backend: RECEIVED Found Item Report Request for " + itemName);
             FoundItem item = new FoundItem();
@@ -140,8 +145,9 @@ public class ItemController {
                 item.setImagePath(fileName);
             }
 
+            System.out.println("DEBUG Submission: Attempting to save found item...");
             FoundItem savedItem = foundItemService.save(item);
-            System.out.println("Backend: SUCCESS saving Found Item Id: " + savedItem.getItemId());
+            System.out.println("DEBUG Submission: SUCCESS saving Found Item Id: " + savedItem.getItemId());
             
             // --- AUTOMATED MATCHING HOOK ---
             try {
@@ -154,8 +160,9 @@ public class ItemController {
             return ResponseEntity.ok(savedItem);
 
         } catch (Exception e) {
+            System.err.println("CRITICAL ERROR in addFoundItem: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body("Error saving found item: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error saving found item: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
     }
 
@@ -187,14 +194,17 @@ public class ItemController {
     // ---------------- HELPERS ----------------
 
     private String saveImage(MultipartFile image) throws Exception {
-        String uploadDir = "C:/Users/HP/OneDrive/Desktop/smart-lost-found-system-main - Copy/backend/uploads/";
-        File uploadFolder = new File(uploadDir);
+        // Use a guaranteed absolute path to prevent any IDE or Tomcat temp directory issues
+        String baseDir = "C:\\Users\\HP\\OneDrive\\Desktop\\smart-lost-found-system-main - Copy\\backend\\uploads\\";
+        File uploadFolder = new File(baseDir);
         if (!uploadFolder.exists()) {
             uploadFolder.mkdirs();
         }
         String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-        File file = new File(uploadDir + fileName);
-        image.transferTo(file);
+        File file = new File(uploadFolder, fileName);
+        
+        java.nio.file.Files.copy(image.getInputStream(), file.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        
         return fileName;
     }
 }

@@ -126,9 +126,7 @@ public class SecureChatController {
                                 match.getFoundItem().getFinder() : match.getLostItem().getUser();
 
                 if (recipient != null) {
-                    String securityKey = (match.getLostItem().getUniqueIdentifier() != null) ? 
-                                        match.getLostItem().getUniqueIdentifier() : 
-                                        match.getFoundItem().getUniqueIdentifier();
+                    String securityKey = match.getSecurityKey();
                                         
                     EmailService emailMsgService = context.getBean(EmailService.class);
                     emailMsgService.sendChatRequestAlert(recipient.getEmail(), sender.getName(), match.getLostItem().getItemName(), securityKey);

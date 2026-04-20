@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 
 import com.lostfound.entity.Match;
-import com.lostfound.service.MatchService;
+import com.lostfound.service.SmartMatchService;
 import com.lostfound.service.AIService;
 
 @RestController
@@ -19,14 +19,20 @@ import com.lostfound.service.AIService;
 public class MatchController {
 
     @Autowired
-    private MatchService matchService;
+    private SmartMatchService matchService;
+
+    @Autowired
+    private com.lostfound.repository.MatchRepository matchRepo;
 
     @Autowired
     private AIService aiService;   // ✅ Inject AI service
 
-    // 1️⃣ Existing endpoint
+    // 1️⃣ Filtered endpoint
     @GetMapping
-    public List<Match> getMatches() {
+    public List<Match> getMatches(@RequestParam(value = "userId", required = false) Long userId) {
+        if (userId != null) {
+            return matchService.getMatchesForUser(userId);
+        }
         return matchService.findMatches();
     }
 
@@ -75,7 +81,6 @@ public class MatchController {
         }
     }
 
-    // 4️⃣ delete match endpoint
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMatch(@PathVariable("id") Long id) {
         try {
@@ -84,6 +89,33 @@ public class MatchController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error deleting match: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/{id}/verify")
+    public ResponseEntity<?> verifySerialNumber(
+            @PathVariable Long id, 
+            @RequestBody Map<String, String> payload) {
+        
+        Match match = matchRepo.findById(id).orElse(null);
+        if (match == null) return ResponseEntity.notFound().build();
+        
+        String providedSerial = payload.get("serialNumber");
+        if (providedSerial != null) {
+            providedSerial = providedSerial.trim();
+        }
+        
+        String lostSerial = match.getLostItem().getUniqueIdentifier();
+        String foundSerial = match.getFoundItem().getUniqueIdentifier();
+        String matchKey = match.getSecurityKey();
+        
+        // Match if provided serial matches either item's ID or the generated match security key
+        boolean isValid = (lostSerial != null && lostSerial.trim().equalsIgnoreCase(providedSerial)) || 
+                          (foundSerial != null && foundSerial.trim().equalsIgnoreCase(providedSerial)) ||
+                          (matchKey != null && matchKey.trim().equalsIgnoreCase(providedSerial));
+                          
+        Map<String, Object> response = new java.util.HashMap<>();
+        response.put("verified", isValid);
+        return ResponseEntity.ok(response);
     }
 }
 
