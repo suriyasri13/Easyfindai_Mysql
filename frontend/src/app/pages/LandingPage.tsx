@@ -31,9 +31,10 @@ export default function LandingPage() {
           </div>
           
           <div className="hidden md:flex items-center gap-10">
-            {['Intelligence', 'Protocols', 'Hotspots', 'Verification'].map((item) => (
-              <a key={item} href="#" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">{item}</a>
-            ))}
+            <a href="#intelligence" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">Intelligence</a>
+            <a href="#protocols" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">Protocols</a>
+            <Link to="/dashboard/gis-map" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">Hotspots</Link>
+            <Link to="/dashboard/help" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">Verification</Link>
           </div>
 
           <div className="flex items-center gap-6">
@@ -80,7 +81,7 @@ export default function LandingPage() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-5xl mx-auto py-20 border-t border-slate-100/50">
+          <div id="protocols" className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-5xl mx-auto py-20 border-t border-slate-100/50">
             {[
               { label: 'Security', val: '100%', sub: 'ENCRYPTED' },
               { label: 'Efficiency', val: 'INSTANT', sub: 'MATCHING' },
@@ -97,7 +98,7 @@ export default function LandingPage() {
       </div>
 
       {/* Features Section */}
-      <div className="py-48 relative z-10">
+      <div id="intelligence" className="py-48 relative z-10">
         {/* Subtle Section Divider */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-32 bg-gradient-to-b from-blue-200 to-transparent"></div>
 
