@@ -68,8 +68,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#f8fafc]">
-      {/* Top Accent Line */}
-      <div className="fixed top-0 left-0 w-full h-2 bg-blue-600 z-[60]"></div>
 
       {/* Floating Lines Animation */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">

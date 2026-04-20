@@ -5,8 +5,6 @@ import TextType from '../components/ui/TextType';
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white font-sans text-[#1e293b] overflow-x-hidden">
-      {/* Top Accent Line */}
-      <div className="fixed top-0 left-0 w-full h-2 bg-blue-600 z-[60]"></div>
       
       {/* Floating Lines Animation */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
