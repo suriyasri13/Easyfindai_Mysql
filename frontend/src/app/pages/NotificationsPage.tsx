@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { Package, Search, CheckCircle, MessageCircle, Globe, Trash2, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import { 
   getNotifications, 
   getGlobalNotifications, 
@@ -20,6 +21,14 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('ALL');
   const { refreshUnreadCount } = useOutletContext<{ refreshUnreadCount: () => void }>();
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    onConfirm: () => {},
+  });
 
   useEffect(() => {
     if (user) {
@@ -64,18 +73,22 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleClearAll = async () => {
+  const handleClearAll = () => {
     if (!user || notifications.length === 0) return;
-    if (!window.confirm("Are you sure you want to clear all notifications?")) return;
-
-    try {
-      await clearAllNotifications(user.userId);
-      setNotifications([]);
-      refreshUnreadCount();
-      toast.success("All notifications cleared");
-    } catch (error) {
-      toast.error("Failed to clear notifications");
-    }
+    
+    setConfirmModal({
+      isOpen: true,
+      onConfirm: async () => {
+        try {
+          await clearAllNotifications(user.userId);
+          setNotifications([]);
+          refreshUnreadCount();
+          toast.success("All notifications cleared");
+        } catch (error) {
+          toast.error("Failed to clear notifications");
+        }
+      }
+    });
   };
 
   const getNotificationStyle = (type: string) => {
@@ -232,6 +245,15 @@ export default function NotificationsPage() {
           })}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title="Clear All Notifications"
+        message="Are you sure you want to clear all your notifications? This cannot be undone."
+        type="danger"
+      />
     </div>
   );
 }

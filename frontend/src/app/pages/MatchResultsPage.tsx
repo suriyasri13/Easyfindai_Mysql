@@ -5,6 +5,7 @@ import { MessageSquare, CheckCircle, Trash2, User, QrCode } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PersonalMatchChat from '../components/PersonalMatchChat';
 import QRHandshakeModal from '../components/QRHandshakeModal';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import { getMatches, deleteMatch, confirmMatch } from "../services/api";
 import { toast } from "sonner";
 
@@ -43,6 +44,20 @@ export default function MatchResultsPage() {
   const highlightedMatchId = new URLSearchParams(location.search).get('matchId');
   const matchRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type: 'danger' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'info'
+  });
+
   useEffect(() => {
     if (matches.length > 0 && highlightedMatchId) {
       const element = matchRefs.current[highlightedMatchId];
@@ -70,42 +85,60 @@ export default function MatchResultsPage() {
     }
   };
 
-  const handleConfirmMatch = async (id: string) => {
-    if (window.confirm("Is the physical item successfully returned to its owner? This will publicly mark the items as MATCH FOUND!")) {
-      try {
-        await confirmMatch(id);
-        toast.success("Item Marked as Recovered!");
-        fetchMatches();
-      } catch (error: any) {
-        toast.error(error.message || "Failed to confirm match");
-      }
-    }
-  };
-
-  const handleDeleteMatch = async (id: string) => {
-    if (window.confirm("Are you sure you want to clear this match? The items will become pending again.")) {
-      try {
-        await deleteMatch(id);
-        toast.success("Match cleared successfully");
-        fetchMatches();
-      } catch (error: any) {
-        toast.error(error.message || "Failed to clear match");
-      }
-    }
-  };
-
-  const handleClearAll = async () => {
-    if (window.confirm("Are you sure you want to clear ALL matches? This cannot be undone.")) {
-      try {
-        for (const match of matches) {
-          await deleteMatch(match.id);
+  const handleConfirmMatch = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Confirm Recovery",
+      message: "Is the physical item successfully returned to its owner? This will publicly mark the items as MATCH FOUND!",
+      type: 'info',
+      onConfirm: async () => {
+        try {
+          await confirmMatch(id);
+          toast.success("Item Marked as Recovered!");
+          fetchMatches();
+        } catch (error: any) {
+          toast.error(error.message || "Failed to confirm match");
         }
-        toast.success("All matches cleared successfully");
-        fetchMatches();
-      } catch (error: any) {
-        toast.error("Failed to clear some matches");
       }
-    }
+    });
+  };
+
+  const handleDeleteMatch = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Clear Match",
+      message: "Are you sure you want to clear this match? The items will become pending again.",
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteMatch(id);
+          toast.success("Match cleared successfully");
+          fetchMatches();
+        } catch (error: any) {
+          toast.error(error.message || "Failed to clear match");
+        }
+      }
+    });
+  };
+
+  const handleClearAll = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Clear All Matches",
+      message: "Are you sure you want to clear ALL matches? This cannot be undone.",
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          for (const match of matches) {
+            await deleteMatch(match.id);
+          }
+          toast.success("All matches cleared successfully");
+          fetchMatches();
+        } catch (error: any) {
+          toast.error("Failed to clear some matches");
+        }
+      }
+    });
   };
 
   const openChat = (match: Match) => {
@@ -195,8 +228,8 @@ export default function MatchResultsPage() {
                       </div>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Confidence Score</p>
-                      <p className="text-lg font-black text-slate-800 uppercase tracking-tight">AI Precision</p>
+                      <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">Score</p>
+                      <p className="text-sm font-black text-slate-800 uppercase tracking-tight">AI Precision</p>
                     </div>
                   </div>
                 </div>
@@ -204,18 +237,18 @@ export default function MatchResultsPage() {
                 <div className="flex gap-4">
                   <Button
                     onClick={() => openChat(match)}
-                    className="bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-lg shadow-sky-100"
+                    className="bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
                   >
-                    <MessageSquare size={18} className="mr-3" />
+                    <MessageSquare size={16} className="mr-2" />
                     Open Chat
                   </Button>
                   
                   {match.status !== 'RESOLVED' && (
                     <Button
                       onClick={() => { setSelectedMatch(match); setIsQRModalOpen(true); }}
-                      className="bg-pink-500 hover:bg-pink-600 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-lg shadow-pink-100"
+                      className="bg-pink-500 hover:bg-pink-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
                     >
-                      <QrCode size={18} className="mr-3" />
+                      <QrCode size={16} className="mr-2" />
                       {match.lostItem.userId?.toString() === user?.userId?.toString() ? "Generate QR" : "Scan QR"}
                     </Button>
                   )}
@@ -223,38 +256,38 @@ export default function MatchResultsPage() {
                   {match.status !== 'RESOLVED' && (
                     <Button
                       onClick={() => handleConfirmMatch(match.id)}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-lg shadow-emerald-100"
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
                     >
-                      <CheckCircle size={18} className="mr-3" />
+                      <CheckCircle size={16} className="mr-2" />
                       Mark Recovered
                     </Button>
                   )}
                 </div>
               </div>
 
-              <div className="mb-10 p-5 bg-sky-500/10 border border-sky-500/20 rounded-2xl">
-                <p className="text-sm text-sky-600 font-black uppercase tracking-widest flex items-center gap-3">
-                  <span className="w-3 h-3 bg-sky-500 rounded-full animate-pulse"></span>
+              <div className="mb-8 p-4 bg-sky-500/10 border border-sky-500/20 rounded-xl">
+                <p className="text-[11px] text-sky-600 font-black uppercase tracking-widest flex items-center gap-3">
+                  <span className="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></span>
                   Key Intelligence Factors: {match.matchReason.join(', ')}
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Lost Item */}
-                <div className="bg-white/40 rounded-[2.5rem] p-8 border border-pink-50 relative group/item hover:bg-white/60 transition-all duration-500">
+                <div className="bg-white/40 rounded-[2rem] p-6 border border-pink-50 relative group/item hover:bg-white/60 transition-all duration-500">
                   {match.lostItem.isConfidential && (
-                    <div className="absolute top-6 right-6 bg-amber-100 text-amber-600 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-200">
+                    <div className="absolute top-4 right-4 bg-amber-100 text-amber-600 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase border border-amber-200">
                       🔐 Protected
                     </div>
                   )}
-                  <div className="flex items-center gap-4 mb-8">
-                    <span className="px-4 py-1.5 bg-pink-500 text-white text-[10px] rounded-xl font-black tracking-widest uppercase shadow-md">
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="px-3 py-1 bg-pink-500 text-white text-[8px] rounded-lg font-black tracking-widest uppercase shadow-md">
                       LOST
                     </span>
-                    <h4 className="text-2xl text-slate-800 font-black tracking-tight uppercase">{match.lostItem.itemName}</h4>
+                    <h4 className="text-xl text-slate-800 font-black tracking-tight uppercase">{match.lostItem.itemName}</h4>
                   </div>
                   {match.lostItem.image && (
-                    <div className="rounded-2xl overflow-hidden mb-6 shadow-xl aspect-video border border-pink-50">
+                    <div className="rounded-xl overflow-hidden mb-4 shadow-md aspect-video border border-pink-50">
                       <img
                         src={match.lostItem.image}
                         alt={match.lostItem.itemName}
@@ -262,37 +295,35 @@ export default function MatchResultsPage() {
                       />
                     </div>
                   )}
-                  <p className="text-sm text-slate-500 mb-8 leading-relaxed font-medium line-clamp-3">
+                  <p className="text-[13px] text-slate-500 mb-6 leading-relaxed font-medium line-clamp-3">
                     {match.lostItem.description}
                   </p>
-                  <div className="flex items-center justify-between pt-6 border-t border-pink-50">
-                    <p className="text-sm text-slate-800 font-black uppercase tracking-widest flex items-center gap-3">
-                      <div className="p-2 bg-pink-50 text-pink-500 rounded-xl">
-                        <User size={18} />
-                      </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-pink-50">
+                    <p className="text-xs text-slate-800 font-black uppercase tracking-widest flex items-center gap-2">
+                      <User size={14} className="text-pink-400" />
                       {match.lostItem.userName}
                     </p>
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
                       {new Date(match.lostItem.date).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
 
                 {/* Found Item */}
-                <div className="bg-white/40 rounded-[2.5rem] p-8 border border-sky-50 relative group/item hover:bg-white/60 transition-all duration-500">
+                <div className="bg-white/40 rounded-[2rem] p-6 border border-sky-50 relative group/item hover:bg-white/60 transition-all duration-500">
                   {match.foundItem.isConfidential && (
-                    <div className="absolute top-6 right-6 bg-amber-100 text-amber-600 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-200">
+                    <div className="absolute top-4 right-4 bg-amber-100 text-amber-600 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase border border-amber-200">
                       🔐 Protected
                     </div>
                   )}
-                  <div className="flex items-center gap-4 mb-8">
-                    <span className="px-4 py-1.5 bg-sky-500 text-white text-[10px] rounded-xl font-black tracking-widest uppercase shadow-md">
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="px-3 py-1 bg-sky-500 text-white text-[8px] rounded-lg font-black tracking-widest uppercase shadow-md">
                       FOUND
                     </span>
-                    <h4 className="text-2xl text-slate-800 font-black tracking-tight uppercase">{match.foundItem.itemName}</h4>
+                    <h4 className="text-xl text-slate-800 font-black tracking-tight uppercase">{match.foundItem.itemName}</h4>
                   </div>
                   {match.foundItem.image && (
-                    <div className="rounded-2xl overflow-hidden mb-6 shadow-xl aspect-video border border-sky-50">
+                    <div className="rounded-xl overflow-hidden mb-4 shadow-md aspect-video border border-sky-50">
                       <img
                         src={match.foundItem.image}
                         alt={match.foundItem.itemName}
@@ -300,17 +331,15 @@ export default function MatchResultsPage() {
                       />
                     </div>
                   )}
-                  <p className="text-sm text-slate-500 mb-8 leading-relaxed font-medium line-clamp-3">
+                  <p className="text-[13px] text-slate-500 mb-6 leading-relaxed font-medium line-clamp-3">
                     {match.foundItem.description}
                   </p>
-                  <div className="flex items-center justify-between pt-6 border-t border-sky-50">
-                    <p className="text-sm text-slate-800 font-black uppercase tracking-widest flex items-center gap-3">
-                      <div className="p-2 bg-sky-50 text-sky-500 rounded-xl">
-                        <User size={18} />
-                      </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-sky-50">
+                    <p className="text-xs text-slate-800 font-black uppercase tracking-widest flex items-center gap-2">
+                      <User size={14} className="text-sky-400" />
                       {match.foundItem.userName}
                     </p>
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
                       {new Date(match.foundItem.date).toLocaleDateString()}
                     </p>
                   </div>
@@ -338,6 +367,15 @@ export default function MatchResultsPage() {
           onSuccess={fetchMatches}
         />
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+      />
     </div>
   );
 }

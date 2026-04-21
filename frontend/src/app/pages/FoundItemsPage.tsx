@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, User, Phone, Search, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import { getFoundItems, deleteFoundItem } from "../services/api";
 import { toast } from "sonner";
 
@@ -24,6 +25,19 @@ interface Item {
 export default function FoundItemsPage() {
   const navigate = useNavigate();
   const [items, setItems] = useState<Item[]>([]);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type: 'danger' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'info'
+  });
 
   useEffect(() => {
     fetchFoundItems();
@@ -55,30 +69,42 @@ export default function FoundItemsPage() {
     }
   };
 
-  const handleDelete = async (id: string | number) => {
-    if (window.confirm("Are you sure you want to clear this item?")) {
-      try {
-        await deleteFoundItem(id);
-        toast.success("Item cleared successfully");
-        fetchFoundItems();
-      } catch (error: any) {
-        toast.error(error.message || "Failed to clear item");
+  const handleDelete = (id: string | number) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Clear Item",
+      message: "Are you sure you want to clear this item from the found database?",
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteFoundItem(id);
+          toast.success("Item cleared successfully");
+          fetchFoundItems();
+        } catch (error: any) {
+          toast.error(error.message || "Failed to clear item");
+        }
       }
-    }
+    });
   };
 
-  const handleClearAll = async () => {
-    if (window.confirm("Are you sure you want to clear ALL found items? This cannot be undone.")) {
-      try {
-        for (const item of items) {
-          await deleteFoundItem(item.id);
+  const handleClearAll = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Clear All Found Items",
+      message: "Are you sure you want to clear ALL found items? This cannot be undone.",
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          for (const item of items) {
+            await deleteFoundItem(item.id);
+          }
+          toast.success("All items cleared successfully");
+          fetchFoundItems();
+        } catch (error: any) {
+          toast.error("Failed to clear some items");
         }
-        toast.success("All items cleared successfully");
-        fetchFoundItems();
-      } catch (error: any) {
-        toast.error("Failed to clear some items");
       }
-    }
+    });
   };
 
   return (
@@ -188,6 +214,15 @@ export default function FoundItemsPage() {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type={confirmModal.type}
+      />
     </div>
   );
 }

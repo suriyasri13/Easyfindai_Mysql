@@ -15,6 +15,7 @@ import {
 } from '../components/ui/select';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import { reportItem } from "../services/api";
 
 
@@ -35,6 +36,8 @@ export default function ReportItemPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
+
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
   const categories = ['Electronics', 'Personal Items', 'Documents', 'Accessories', 'Clothing', 'Keys', 'Bags', 'Jewelry', 'Other'];
   const campusLocations = ['Classroom', 'Library', 'Canteen', 'Lab', 'Hostel', 'Playground', 'Auditorium', 'Parking Area', 'Other'];
@@ -260,7 +263,7 @@ export default function ReportItemPage() {
             
             <Button 
               type="button" 
-              onClick={resetForm}
+              onClick={() => setIsClearModalOpen(true)}
               className="w-full bg-white/50 text-slate-400 hover:text-rose-500 border border-pink-100 font-black uppercase tracking-widest py-4 rounded-xl text-[9px] transition-all"
             >
               <Trash2 size={14} className="mr-2" /> Clear All Data
@@ -268,6 +271,15 @@ export default function ReportItemPage() {
           </div>
         </form>
       </div>
+
+      <ConfirmModal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        onConfirm={resetForm}
+        title="Reset Form"
+        message="Are you sure you want to clear all data in this report? This cannot be undone."
+        type="danger"
+      />
     </div>
   );
 }
