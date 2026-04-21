@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lost_items")
@@ -35,8 +36,13 @@ public class LostItem {
     private String category;
     private String description;
     
+    private LocalDateTime createdAt;
 
 	private String contactInfo;
+
+    public LostItem() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     // Getters & Setters
     public Long getItemId() { 
@@ -124,6 +130,14 @@ public class LostItem {
 	public void setContactInfo(String contactInfo) {
 		this.contactInfo = contactInfo;
 	}
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
 	private boolean isConfidential = false;
 	private String uniqueIdentifier;

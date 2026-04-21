@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Upload, X } from 'lucide-react';
+import { MapPin, Upload, X, Mic, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -37,6 +37,8 @@ export default function ReportItemPage() {
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentCoords, setCurrentCoords] = useState<[number, number] | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
 
   useEffect(() => {
     if (currentCoords) {
@@ -173,6 +175,91 @@ export default function ReportItemPage() {
     setCurrentCoords(null);
   };
 
+  const handleVoiceAssistant = () => {
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Your browser does not support voice recognition.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.info("Listening... Tell me what you lost or found!");
+    };
+
+    recognition.onresult = async (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setIsListening(false);
+      setIsParsing(true);
+      
+      try {
+        console.log("Sending transcript to backend:", transcript);
+        const res = await fetch("http://localhost:8080/api/voice/parse", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: transcript })
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || `Server responded with ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log("AI Voice Parse Result:", data);
+        
+        if (data.error) throw new Error(data.error);
+
+        // Auto-fill the form with robust key matching
+        const findVal = (keys: string[]) => {
+          const key = keys.find(k => data[k]);
+          return key ? data[key] : null;
+        };
+
+        const parsedItemName = findVal(['itemName', 'item_name', 'name', 'item']);
+        const parsedCategory = findVal(['category', 'itemCategory', 'type']);
+        const parsedDesc = findVal(['description', 'desc', 'details']);
+        const parsedLoc = findVal(['location', 'loc', 'place']);
+        const parsedType = findVal(['itemType', 'item_type', 'status']);
+
+        if (parsedItemName) setItemName(parsedItemName);
+        if (parsedCategory) setCategory(parsedCategory);
+        if (parsedDesc) setDescription(parsedDesc);
+        if (parsedLoc) setLocation(parsedLoc);
+        if (parsedType) setItemType(parsedType.toLowerCase().includes('found') ? 'found' : 'lost');
+        
+        if (!date) setDate(new Date().toISOString().split('T')[0]);
+
+        toast.success("AI parsed your voice report!", {
+          description: `Identified: ${parsedItemName || 'Item'}`,
+        });
+      } catch (err: any) {
+        console.error("Voice Assistant Error:", err);
+        toast.error("AI Assistant Error", {
+          description: err.message || "Failed to parse voice transcript. Is the AI server running?"
+        });
+      } finally {
+        setIsParsing(false);
+      }
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+      toast.error("Voice recognition failed. Try again.");
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -256,8 +343,40 @@ export default function ReportItemPage() {
   return (
     <div className="max-w-4xl mx-auto pb-12 relative z-10">
       <div className="glass rounded-[3.5rem] shadow-2xl p-12 border border-white/60">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl text-[#1e293b] font-bold">Report Item</h2>
+        <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
+          <div>
+            <h2 className="text-4xl text-[#1e293b] font-black tracking-tight flex items-center gap-3">
+              Report Item
+              <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-3 py-1 rounded-full uppercase tracking-widest border border-blue-200">AI Enabled</span>
+            </h2>
+            <p className="text-slate-500 font-medium mt-1">Intelligent item reporting system</p>
+          </div>
+          <Button
+            type="button"
+            onClick={handleVoiceAssistant}
+            disabled={isListening || isParsing}
+            className={`rounded-[1.5rem] px-8 py-8 transition-all ${
+              isListening 
+                ? "bg-rose-500 animate-pulse scale-105 shadow-rose-200" 
+                : "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
+            } text-white shadow-2xl flex items-center gap-4 group`}
+          >
+            {isParsing ? (
+              <Loader2 className="animate-spin" size={24} />
+            ) : isListening ? (
+              <Sparkles className="animate-bounce" size={24} />
+            ) : (
+              <Mic size={24} className="group-hover:scale-125 transition-transform" />
+            )}
+            <div className="text-left">
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-70">
+                {isParsing ? "Processing" : isListening ? "Status" : "Proactive Reporting"}
+              </p>
+              <p className="font-black text-sm uppercase tracking-widest">
+                {isParsing ? "AI Parsing..." : isListening ? "Listening..." : "Voice Assistant"}
+              </p>
+            </div>
+          </Button>
         </div>
 
         {/* Item Type Selection - Exactly matching image */}

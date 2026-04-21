@@ -117,5 +117,24 @@ public class MatchController {
         response.put("verified", isValid);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{id}/handshake")
+    public ResponseEntity<?> qrHandshake(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
+        
+        Match match = matchRepo.findById(id).orElse(null);
+        if (match == null) return ResponseEntity.notFound().build();
+        
+        String providedKey = payload.get("key");
+        if (providedKey == null) return ResponseEntity.badRequest().body("Key is required");
+        
+        if (match.getSecurityKey().equalsIgnoreCase(providedKey.trim())) {
+            matchService.confirmMatch(id); // Reusing confirmMatch to mark as RESOLVED
+            return ResponseEntity.ok("Handshake successful. Item marked as returned.");
+        } else {
+            return ResponseEntity.status(401).body("Invalid security key for handshake.");
+        }
+    }
 }
 

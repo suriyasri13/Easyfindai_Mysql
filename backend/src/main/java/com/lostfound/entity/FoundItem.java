@@ -2,6 +2,7 @@ package com.lostfound.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "found_items")
@@ -26,10 +27,16 @@ public class FoundItem {
     private String description;
     private String contactInfo;
 
+    private LocalDateTime createdAt;
+
     // Many found items belong to one user (finder)
     @ManyToOne
     @JoinColumn(name = "finder_id", nullable = false)
     private User finder;
+
+    public FoundItem() {
+        this.createdAt = LocalDateTime.now();
+    }
     // getters & setters
     
     
@@ -119,6 +126,14 @@ public class FoundItem {
 
     public void setContactInfo(String contactInfo) {
         this.contactInfo = contactInfo;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     private boolean isConfidential = false;

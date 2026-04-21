@@ -181,8 +181,8 @@ public class SmartMatchService {
         
         match = matchRepo.save(match);
 
-        notifyUser(lost.getUser().getUserId(), match.getMatchId(), "We found an item that might be your lost " + lost.getItemName() + "! Security Key: " + match.getSecurityKey());
-        notifyUser(found.getFinder().getUserId(), match.getMatchId(), "Your found item '" + found.getItemName() + "' matches a lost report! Security Key: " + match.getSecurityKey());
+        notifyUser(lost.getUser().getUserId(), match.getMatchId(), "We found an item that might be your lost " + lost.getItemName() + "! Please check your email for the security verification key.");
+        notifyUser(found.getFinder().getUserId(), match.getMatchId(), "Your found item '" + found.getItemName() + "' matches a lost report! Please check your email for the security verification key.");
 
         try {
             emailService.sendMatchAlert(lost.getUser().getEmail(), lost.getUser().getName(), lost.getItemName(), match.getSecurityKey());

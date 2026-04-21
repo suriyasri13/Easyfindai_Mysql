@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.feature_extractor import extract_image_features
 from utils.matcher import match_image_features, deep_text_similarity
+from utils.voice_parser import parse_voice_transcript
 
 app = Flask(__name__)
 
@@ -97,6 +98,23 @@ def moderate_chat():
     return jsonify({
         "message": bot_message
     })
+
+@app.route("/voice", methods=["POST"])
+def voice_parse():
+    data = request.get_json()
+    if not data or "text" not in data:
+        return jsonify({"error": "Missing 'text' field"}), 400
+        
+    transcript = data["text"]
+    print(f"VOICE_AI -> Processing transcript: '{transcript}'")
+    
+    try:
+        result = parse_voice_transcript(transcript)
+        print(f"VOICE_AI -> Parse Result: {result}")
+        return jsonify(result)
+    except Exception as e:
+        print(f"VOICE_AI -> Error: {str(e)}")
+        return jsonify({"error": f"Internal AI error: {str(e)}"}), 500
 
 if __name__ == "__main__":
     app.run(port=5000, host='0.0.0.0', debug=True)

@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { MessageSquare, CheckCircle, Trash2, User } from 'lucide-react';
+import { MessageSquare, CheckCircle, Trash2, User, QrCode } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PersonalMatchChat from '../components/PersonalMatchChat';
+import QRHandshakeModal from '../components/QRHandshakeModal';
 import { getMatches, deleteMatch, confirmMatch } from "../services/api";
 import { toast } from "sonner";
 
@@ -37,6 +38,7 @@ export default function MatchResultsPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const location = useLocation();
   const highlightedMatchId = new URLSearchParams(location.search).get('matchId');
   const matchRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -225,6 +227,19 @@ export default function MatchResultsPage() {
                   
                   {match.status !== 'RESOLVED' && (
                     <Button
+                      onClick={() => {
+                        setSelectedMatch(match);
+                        setIsQRModalOpen(true);
+                      }}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 px-8 rounded-xl transition-all"
+                    >
+                      <QrCode size={20} className="mr-3" />
+                      {match.lostItem.userId?.toString() === user?.userId?.toString() ? "Generate QR" : "Scan QR"}
+                    </Button>
+                  )}
+                  
+                  {match.status !== 'RESOLVED' && (
+                    <Button
                       onClick={() => handleConfirmMatch(match.id)}
                       className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-6 px-8 rounded-xl transition-all"
                     >
@@ -333,6 +348,20 @@ export default function MatchResultsPage() {
             setSelectedMatch(null);
           }}
           match={selectedMatch}
+        />
+      )}
+
+      {/* QR Handshake Modal */}
+      {selectedMatch && (
+        <QRHandshakeModal
+          isOpen={isQRModalOpen}
+          onClose={() => {
+            setIsQRModalOpen(false);
+            setSelectedMatch(null);
+          }}
+          match={selectedMatch}
+          userRole={selectedMatch.lostItem.userId?.toString() === user?.userId?.toString() ? 'owner' : 'finder'}
+          onSuccess={fetchMatches}
         />
       )}
     </div>
