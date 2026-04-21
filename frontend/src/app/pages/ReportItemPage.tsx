@@ -342,14 +342,14 @@ export default function ReportItemPage() {
 
   return (
     <div className="max-w-4xl mx-auto pb-12 relative z-10">
-      <div className="glass rounded-[3.5rem] shadow-2xl p-12 border border-white/60">
+      <div className="bg-white/5 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl p-12 border border-white/10">
         <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
           <div>
-            <h2 className="text-4xl text-[#1e293b] font-black tracking-tight flex items-center gap-3">
+            <h2 className="text-4xl text-white font-black tracking-tight flex items-center gap-3 uppercase">
               Report Item
-              <span className="text-[10px] font-black bg-blue-100 text-blue-600 px-3 py-1 rounded-full uppercase tracking-widest border border-blue-200">AI Enabled</span>
+              <span className="text-[10px] font-black bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full uppercase tracking-widest border border-blue-500/20">AI Enabled</span>
             </h2>
-            <p className="text-slate-500 font-medium mt-1">Intelligent item reporting system</p>
+            <p className="text-slate-400 font-medium mt-1">Intelligent item reporting system</p>
           </div>
           <Button
             type="button"
@@ -379,15 +379,15 @@ export default function ReportItemPage() {
           </Button>
         </div>
 
-        {/* Item Type Selection - Exactly matching image */}
-        <div className="flex gap-4 mb-10 bg-slate-100/50 p-2 rounded-2xl border border-white/40">
+        {/* Item Type Selection */}
+        <div className="flex gap-4 mb-10 bg-white/5 p-2 rounded-3xl border border-white/10">
           <button
             type="button"
             onClick={() => setItemType('lost')}
-            className={`flex-1 py-4 rounded-xl transition-all font-bold text-[16px] ${
+            className={`flex-1 py-5 rounded-2xl transition-all font-black uppercase tracking-widest text-xs ${
               itemType === 'lost'
-                ? 'bg-[#ef4444] text-white'
-                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                ? 'bg-rose-500 text-white shadow-xl shadow-rose-500/20'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             Report Lost Item
@@ -395,10 +395,10 @@ export default function ReportItemPage() {
           <button
             type="button"
             onClick={() => setItemType('found')}
-            className={`flex-1 py-4 rounded-xl transition-all font-bold text-[16px] ${
+            className={`flex-1 py-5 rounded-2xl transition-all font-black uppercase tracking-widest text-xs ${
               itemType === 'found'
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             Report Found Item
@@ -414,7 +414,7 @@ export default function ReportItemPage() {
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 placeholder="e.g., Laptop, Wallet, Keys"
-                className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
+                className="bg-white/5 border-white/10 text-white focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
               />
             </div>
 
@@ -442,7 +442,7 @@ export default function ReportItemPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Provide detailed description..."
-              className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 min-h-[140px] text-[15px] p-4 rounded-xl"
+              className="bg-white/5 border-white/10 text-white focus:border-blue-500 focus:ring-0 min-h-[140px] text-[15px] p-4 rounded-xl"
             />
           </div>
 
@@ -454,7 +454,7 @@ export default function ReportItemPage() {
                 value={contactInfo}
                 onChange={(e) => setContactInfo(e.target.value)}
                 placeholder="Email or Phone Number"
-                className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
+                className="bg-white/5 border-white/10 text-white focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
               />
             </div>
 
@@ -465,16 +465,16 @@ export default function ReportItemPage() {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-[#f1f5f9] border-slate-200 text-slate-900 focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
+                className="bg-white/5 border-white/10 text-white focus:border-blue-500 focus:ring-0 py-6 text-[15px] rounded-xl"
               />
             </div>
           </div>
 
           {/* Location Section */}
           <div className="bg-white/40 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/60 shadow-xl shadow-blue-500/[0.02]">
-            <Label className="text-[#1e293b] text-base font-bold mb-6 block">
-              {itemType === 'lost' ? 'Last Known Location *' : 'Current Storage Location *'}
-            </Label>
+              <Label className="text-white text-base font-black uppercase tracking-widest mb-6 block">
+                {itemType === 'lost' ? 'Last Known Location *' : 'Current Storage Location *'}
+              </Label>
             <div className="space-y-6">
               <Button
                 type="button"
