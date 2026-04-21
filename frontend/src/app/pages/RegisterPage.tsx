@@ -6,6 +6,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { toast } from "sonner";
 import { registerUser } from "../services/api";
+import bgImage from '../assets/background.png';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ export default function RegisterPage() {
       {/* Immersive Background Image with Dark Overlay */}
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-[20s] scale-110 animate-slow-zoom"
-        style={{ backgroundImage: 'url("/background.png")' }}
+        style={{ backgroundImage: `url(${bgImage})` }}
       >
         <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px]"></div>
       </div>
