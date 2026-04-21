@@ -10,7 +10,8 @@ An AI-powered intelligence platform for campus lost and found management.
 - **💬 Real-time Chat**: Secure coordination between owners and finders.
 
 ## 🚀 Live Demo
-**[Deploying to Vercel...]**
+- **Frontend (Vercel)**: [https://frontend-navy-seven-51.vercel.app](https://frontend-navy-seven-51.vercel.app)
+- **Backend API (Railway)**: [https://easyfindaimysql-production.up.railway.app](https://easyfindaimysql-production.up.railway.app)
 
 ## 🛠️ Tech Stack
 - **Frontend**: React, Vite, Tailwind CSS, Lucide Icons.
