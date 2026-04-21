@@ -70,81 +70,90 @@ export default function QRHandshakeModal({ isOpen, onClose, match, userRole, onS
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden relative border border-white/20">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-6 font-sans">
+      <div className="bg-white/90 backdrop-blur-3xl rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden relative border border-pink-100 animate-in zoom-in-95 duration-300">
+        
+        {/* Soft Dream Header */}
+        <div className="bg-gradient-to-r from-sky-500 to-pink-500 p-8 text-white relative">
           <button 
             onClick={onClose} 
-            className="absolute top-6 right-6 p-2 hover:bg-white/20 rounded-full transition-colors"
+            className="absolute top-6 right-6 p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/10"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-white/20 rounded-2xl">
-              <QrCode size={28} />
+          <div className="flex items-center gap-4 mb-3">
+            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md border border-white/20">
+              <QrCode size={24} />
             </div>
-            <h3 className="text-2xl font-black tracking-tight">QR Handshake</h3>
+            <div>
+              <h3 className="text-xl font-black tracking-tighter uppercase">QR Handshake</h3>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <p className="text-[9px] font-black text-white/80 uppercase tracking-widest">Secure Verification</p>
+              </div>
+            </div>
           </div>
-          <p className="text-blue-100 font-medium">
+          <p className="text-[11px] text-white/90 font-bold leading-relaxed uppercase tracking-widest opacity-80 mt-4">
             {userRole === 'owner' 
-              ? "Show this code to the person who found your item." 
-              : "Scan the owner's QR code to confirm you've returned the item."}
+              ? "Generate your owner verification key." 
+              : "Scan the owner's key to confirm recovery."}
           </p>
         </div>
 
-        {/* Content */}
+        {/* Content Area */}
         <div className="p-10 flex flex-col items-center text-center">
           {success ? (
             <div className="space-y-6 py-8">
-              <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
+              <div className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2.5rem] flex items-center justify-center mx-auto animate-bounce border border-emerald-100 shadow-lg shadow-emerald-50">
                 <CheckCircle2 size={48} />
               </div>
               <div>
-                <h4 className="text-2xl font-bold text-slate-900">Return Confirmed!</h4>
-                <p className="text-slate-500 font-medium mt-2">The item has been officially recovered.</p>
+                <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Handshake Complete!</h4>
+                <p className="text-slate-500 font-medium mt-2">Item recovery has been officially verified.</p>
               </div>
             </div>
           ) : userRole === 'owner' ? (
-            <div className="space-y-8">
-              <div className="bg-slate-50 p-8 rounded-[2rem] border-2 border-dashed border-slate-200">
+            <div className="space-y-8 w-full">
+              <div className="bg-white p-8 rounded-[2.5rem] border-2 border-dashed border-pink-100 shadow-inner inline-block relative group">
+                <div className="absolute inset-0 bg-sky-500/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem]"></div>
                 <QRCodeSVG 
                   value={JSON.stringify({ matchId: match.id, key: match.securityKey })} 
-                  size={200}
+                  size={180}
                   includeMargin={true}
                   level="H"
+                  fgColor="#1e293b"
                 />
               </div>
-              <div>
-                <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-2">Security Token</p>
-                <div className="bg-blue-50 px-6 py-3 rounded-xl border border-blue-100">
-                  <code className="text-xl font-mono font-bold text-blue-600 tracking-widest">{match.securityKey}</code>
+              <div className="space-y-3">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Manual Security Token</p>
+                <div className="bg-sky-50 px-6 py-4 rounded-2xl border border-sky-100 shadow-sm">
+                  <code className="text-2xl font-mono font-black text-sky-600 tracking-[0.3em]">{match.securityKey}</code>
                 </div>
               </div>
             </div>
           ) : (
             <div className="w-full space-y-6">
               {!isScanning ? (
-                <div className="py-12 flex flex-col items-center gap-6">
-                  <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center">
-                    <Camera size={40} />
+                <div className="py-12 flex flex-col items-center gap-8">
+                  <div className="w-20 h-20 bg-pink-50 text-pink-500 rounded-[2rem] flex items-center justify-center shadow-lg shadow-pink-50/50">
+                    <Camera size={36} />
                   </div>
                   <Button 
                     onClick={() => setIsScanning(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-10 py-6 rounded-2xl text-lg shadow-xl"
+                    className="bg-slate-800 hover:bg-slate-900 text-white font-black uppercase tracking-[0.2em] px-12 py-7 rounded-2xl text-xs shadow-2xl transition-all active:scale-95"
                   >
-                    Launch QR Scanner
+                    Launch Intelligence Scanner
                   </Button>
                 </div>
               ) : (
                 <div className="w-full">
-                  <div id="qr-reader" className="overflow-hidden rounded-2xl border-2 border-blue-600"></div>
+                  <div id="qr-reader" className="overflow-hidden rounded-3xl border-4 border-sky-500 shadow-2xl"></div>
                   <Button 
                     onClick={() => setIsScanning(false)}
                     variant="ghost"
-                    className="mt-6 text-slate-500 font-bold"
+                    className="mt-8 text-slate-400 hover:text-rose-500 font-black uppercase tracking-widest text-[10px]"
                   >
-                    Cancel Scan
+                    Abort Scanning Protocol
                   </Button>
                 </div>
               )}
@@ -152,10 +161,11 @@ export default function QRHandshakeModal({ isOpen, onClose, match, userRole, onS
           )}
         </div>
 
-        {/* Footer */}
-        <div className="bg-slate-50 p-6 border-t border-slate-100 text-center">
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
-            🛡️ Secure Verification by EaseFind.AI
+        {/* Theme Footer */}
+        <div className="bg-slate-50/50 p-6 border-t border-pink-50 text-center">
+          <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest flex items-center justify-center gap-2">
+            <span className="w-1.5 h-1.5 bg-sky-500 rounded-full animate-ping"></span>
+            🛡️ Neural Encryption Active
           </p>
         </div>
       </div>
