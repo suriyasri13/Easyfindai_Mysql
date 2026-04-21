@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Package, Search, CheckCircle, MessageCircle, Globe, Trash2, XCircle, ChevronRight } from 'lucide-react';
+import { Package, Search, CheckCircle, MessageCircle, Globe, Trash2, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -30,13 +30,11 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     if (!user) return;
     try {
-      // Fetch both Private and Global notifications
       const [privateData, globalData] = await Promise.all([
         getNotifications(user.userId),
         getGlobalNotifications()
       ]);
 
-      // Merge and sort by date descending
       const combined = [...privateData, ...globalData].sort((a, b) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
@@ -44,7 +42,6 @@ export default function NotificationsPage() {
       setNotifications(combined);
       setLoading(false);
       
-      // Auto-mark private notifications as read
       const unreadPrivateIds = privateData.filter(n => !n.isRead).map(n => n.id);
       if (unreadPrivateIds.length > 0) {
         await Promise.all(unreadPrivateIds.map(id => markNotificationAsRead(id)));
@@ -85,39 +82,29 @@ export default function NotificationsPage() {
     switch (type.toUpperCase()) {
       case 'GLOBAL':
         return {
-          bg: 'from-blue-600/10 to-transparent border-blue-500/20',
-          icon: <div className="p-3 bg-blue-500/20 rounded-xl"><Globe className="text-blue-400" size={24} /></div>,
+          icon: <div className="p-3 bg-sky-500/10 rounded-xl"><Globe className="text-sky-500" size={20} /></div>,
           badge: 'Public Alert',
-          accent: 'text-blue-400'
         };
       case 'CHAT':
         return {
-          bg: 'from-indigo-600/10 to-transparent border-indigo-500/20',
-          icon: <div className="p-3 bg-indigo-500/20 rounded-xl"><MessageCircle className="text-indigo-400" size={24} /></div>,
-          badge: 'New Message',
-          accent: 'text-indigo-400'
+          icon: <div className="p-3 bg-pink-500/10 rounded-xl"><MessageCircle className="text-pink-500" size={20} /></div>,
+          badge: 'Message',
         };
       case 'FOUND':
         return {
-          bg: 'from-sky-600/10 to-transparent border-sky-500/20',
-          icon: <div className="p-3 bg-sky-500/20 rounded-xl"><Search className="text-sky-400" size={24} /></div>,
-          badge: 'Found Item',
-          accent: 'text-sky-400'
+          icon: <div className="p-3 bg-sky-500/10 rounded-xl"><Search className="text-sky-500" size={20} /></div>,
+          badge: 'Found',
         };
       case 'MATCH':
         return {
-          bg: 'from-emerald-600/10 to-transparent border-emerald-500/20',
-          icon: <div className="p-3 bg-emerald-500/20 rounded-xl"><CheckCircle className="text-emerald-400" size={24} /></div>,
-          badge: 'Match Found',
-          accent: 'text-emerald-400'
+          icon: <div className="p-3 bg-emerald-500/10 rounded-xl"><CheckCircle className="text-emerald-500" size={20} /></div>,
+          badge: 'Match',
         };
       case 'LOST':
       default:
         return {
-          bg: 'from-rose-600/10 to-transparent border-rose-500/20',
-          icon: <div className="p-3 bg-rose-500/20 rounded-xl"><Package className="text-rose-400" size={24} /></div>,
+          icon: <div className="p-3 bg-rose-500/10 rounded-xl"><Package className="text-rose-500" size={20} /></div>,
           badge: 'Lost Item',
-          accent: 'text-rose-400'
         };
     }
   };
@@ -129,62 +116,61 @@ export default function NotificationsPage() {
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
-
     if (diffHours < 1) return 'Just now';
-    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays === 1) return 'Yesterday';
-    return `${diffDays} days ago`;
+    return `${diffDays}d ago`;
   };
 
   return (
-    <div className="max-w-5xl mx-auto pb-12">
-      <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="max-w-4xl mx-auto pb-12 relative z-10">
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-4xl text-[#1e293b] font-bold tracking-tight">Notifications</h2>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Stay updated with your items and matches</p>
+          <h2 className="text-3xl text-slate-800 font-black tracking-tighter uppercase">Notifications</h2>
+          <p className="text-slate-500 mt-1 text-sm font-medium">Stay updated with your intelligence alerts.</p>
         </div>
         {notifications.length > 0 && (
           <button 
             onClick={handleClearAll}
-            className="flex items-center gap-3 px-8 py-4 bg-slate-50 text-slate-500 hover:bg-rose-50 hover:text-rose-600 border border-slate-100 rounded-[1.5rem] transition-all font-bold text-sm shadow-sm"
+            className="flex items-center gap-2 px-6 py-3 bg-white/50 text-slate-500 hover:text-rose-500 border border-pink-100 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest shadow-sm"
           >
-            <Trash2 size={20} />
+            <Trash2 size={16} />
             Clear All
           </button>
         )}
       </div>
 
-      <div className="flex gap-3 mb-12 overflow-x-auto pb-4 no-scrollbar">
+      <div className="flex gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
         {['ALL', 'UNREAD', 'MATCHES', 'CHATS'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-8 py-4 rounded-[1.5rem] font-bold text-sm transition-all whitespace-nowrap shadow-sm border ${
+            className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border ${
               activeTab === tab 
-                ? 'bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-100 scale-105' 
-                : 'bg-white text-slate-500 hover:bg-slate-50 border-slate-100'
+                ? 'bg-sky-500 text-white border-sky-500 shadow-lg shadow-sky-100' 
+                : 'bg-white/50 text-slate-400 border-pink-50'
             }`}
           >
-            {tab.charAt(0) + tab.slice(1).toLowerCase()}
+            {tab}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-[2.5rem] shadow-xl p-20 text-center animate-pulse border border-slate-100">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-slate-400 text-lg font-bold uppercase tracking-widest">Synchronizing Intelligence...</p>
+        <div className="bg-white/40 backdrop-blur-2xl rounded-[2rem] p-16 text-center animate-pulse border border-pink-100">
+          <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400 text-xs font-black uppercase tracking-widest">Syncing Data...</p>
         </div>
       ) : notifications.length === 0 ? (
-        <div className="bg-white rounded-[2.5rem] shadow-xl p-24 text-center border border-slate-100">
-          <div className="w-24 h-24 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-8">
-            <CheckCircle size={48} className="text-slate-300" />
+        <div className="bg-white/40 backdrop-blur-2xl rounded-[2rem] p-16 text-center border border-pink-100 shadow-xl">
+          <div className="w-20 h-20 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <CheckCircle size={40} className="text-pink-300" />
           </div>
-          <p className="text-[#1e293b] text-3xl font-bold mb-3 tracking-tight">You're all caught up!</p>
-          <p className="text-slate-500 text-lg font-medium">No new notifications detected by our AI sensors.</p>
+          <p className="text-slate-800 text-2xl font-black mb-2 uppercase tracking-tight">All caught up!</p>
+          <p className="text-slate-500 text-sm font-medium">No new notifications detected.</p>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-4">
           {notifications.filter(n => {
             if (activeTab === 'ALL') return true;
             if (activeTab === 'UNREAD') return !n.isRead;
@@ -198,57 +184,44 @@ export default function NotificationsPage() {
             return (
               <div
                 key={notification.id}
-                className={`group relative bg-white rounded-[2.5rem] shadow-xl p-10 border border-slate-100 transition-all hover:shadow-2xl hover:-translate-y-1 ${
-                  isUnread ? 'border-l-8 border-l-blue-500' : ''
+                className={`group relative bg-white/60 backdrop-blur-2xl rounded-[1.75rem] shadow-md p-6 border border-pink-50 transition-all hover:shadow-lg ${
+                  isUnread ? 'border-l-4 border-l-sky-500' : ''
                 }`}
               >
-                {/* Individual Clear Button */}
                 <button 
                   onClick={() => handleDelete(notification.id)}
-                  className="absolute top-8 right-8 p-4 text-slate-300 hover:text-white hover:bg-rose-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300"
-                  title="Remove notification"
+                  className="absolute top-6 right-6 p-3 text-slate-300 hover:text-white hover:bg-rose-500 rounded-xl opacity-0 group-hover:opacity-100 transition-all"
                 >
-                  <Trash2 size={22} />
+                  <Trash2 size={16} />
                 </button>
 
-                <div className="flex items-start gap-10">
+                <div className="flex items-start gap-6">
                   <div className="flex-shrink-0">
-                    <div className="bg-slate-50 p-5 rounded-[2rem] border border-slate-100 shadow-inner group-hover:scale-110 transition-transform">
-                      {style.icon}
-                    </div>
+                    {style.icon}
                   </div>
-                  <div className="flex-1 pr-16">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="text-2xl text-[#1e293b] font-bold tracking-tight leading-tight">
+                  <div className="flex-1 pr-12">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <h3 className="text-lg text-slate-800 font-black tracking-tight">
                         {notification.title}
                       </h3>
-                      <div className="flex gap-4">
-                        {style.badge && (
-                          <span className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${
-                            notification.type === 'GLOBAL' ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-500 border border-slate-100'
-                          }`}>
-                            {style.badge}
-                          </span>
-                        )}
-                        {isUnread && (
-                          <span className="px-5 py-2 bg-blue-500 text-white text-[10px] rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-100">
-                            New
-                          </span>
-                        )}
-                      </div>
+                      {isUnread && (
+                        <span className="px-3 py-1 bg-sky-500 text-white text-[8px] rounded-lg font-black uppercase tracking-widest shadow-md">
+                          New
+                        </span>
+                      )}
                     </div>
-                    <p className="text-slate-500 text-lg mb-8 leading-relaxed font-medium">{notification.message}</p>
+                    <p className="text-slate-500 text-sm mb-4 leading-relaxed font-medium">{notification.message}</p>
                     
-                    <div className="flex items-center justify-between pt-6 border-t border-slate-50 mt-auto">
-                      <p className="text-slate-400 text-xs font-black tracking-widest uppercase">{formatDate(notification.createdAt)}</p>
+                    <div className="flex items-center justify-between pt-4 border-t border-pink-50 mt-auto">
+                      <p className="text-slate-400 text-[10px] font-black tracking-widest uppercase">{formatDate(notification.createdAt)}</p>
                       
                       {notification.actionUrl && (
                         <button
                           onClick={() => navigate(notification.actionUrl!)}
-                          className={`flex items-center gap-3 text-sm font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 transition-all group/btn`}
+                          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-sky-600 hover:text-sky-700 group/btn"
                         >
-                          {notification.actionText || 'Explore Details'} 
-                          <ChevronRight size={20} className="transform group-hover/btn:translate-x-2 transition-transform" />
+                          {notification.actionText || 'View'} 
+                          <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                         </button>
                       )}
                     </div>

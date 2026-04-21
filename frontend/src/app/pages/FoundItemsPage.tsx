@@ -67,19 +67,39 @@ export default function FoundItemsPage() {
     }
   };
 
+  const handleClearAll = async () => {
+    if (window.confirm("Are you sure you want to clear ALL found items? This cannot be undone.")) {
+      try {
+        for (const item of items) {
+          await deleteFoundItem(item.id);
+        }
+        toast.success("All items cleared successfully");
+        fetchFoundItems();
+      } catch (error: any) {
+        toast.error("Failed to clear some items");
+      }
+    }
+  };
+
   return (
-    <div className="space-y-8 relative z-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="max-w-6xl mx-auto space-y-6 relative z-10 pb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-4xl text-slate-800 font-black tracking-tighter uppercase">Found Items</h2>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Search through items reported as found on campus.</p>
+          <h2 className="text-3xl text-slate-800 font-black tracking-tighter uppercase">Found Items</h2>
+          <p className="text-slate-500 mt-1 text-sm font-medium">Search items reported as found on campus.</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3">
+          <Button 
+            onClick={handleClearAll}
+            className="bg-white/50 text-slate-500 hover:text-rose-500 border border-pink-100 px-6 py-3 rounded-xl transition-all font-black uppercase tracking-widest text-[9px] shadow-sm"
+          >
+            Clear All
+          </Button>
           <Button 
             onClick={() => navigate('/dashboard/report-item')}
-            className="bg-sky-500 hover:bg-sky-600 text-white px-8 py-6 rounded-2xl transition-all font-black uppercase tracking-widest text-[10px] shadow-lg shadow-sky-200"
+            className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 rounded-xl transition-all font-black uppercase tracking-widest text-[9px] shadow-md shadow-sky-100"
           >
-            Report Found Item
+            Report Found
           </Button>
         </div>
       </div>
@@ -97,7 +117,7 @@ export default function FoundItemsPage() {
           {items.map((item) => (
             <div
               key={item.id}
-              className="group bg-white/60 backdrop-blur-2xl rounded-[2.5rem] shadow-xl border border-sky-50 overflow-hidden hover:-translate-y-2 transition-all duration-500 flex flex-col h-full"
+              className="group bg-white/60 backdrop-blur-2xl rounded-[1.75rem] shadow-lg border border-sky-50 overflow-hidden hover:-translate-y-1 transition-all duration-500 flex flex-col h-full"
             >
               <div className="relative aspect-video overflow-hidden border-b border-sky-50">
                 {item.image ? (
@@ -125,16 +145,16 @@ export default function FoundItemsPage() {
                 </div>
               </div>
 
-              <div className="p-8 flex-1 flex flex-col">
-                <h3 className="text-2xl text-slate-800 mb-3 font-black tracking-tight line-clamp-1 group-hover:text-pink-600 transition-colors">
+              <div className="p-6 flex-1 flex flex-col">
+                <h3 className="text-xl text-slate-800 mb-2 font-black tracking-tight line-clamp-1 group-hover:text-pink-600 transition-colors">
                   {item.itemName}
                 </h3>
-                <p className="text-sm text-slate-500 mb-6 line-clamp-2 leading-relaxed font-medium">
+                <p className="text-[13px] text-slate-500 mb-4 line-clamp-2 leading-relaxed font-medium">
                   {item.description}
                 </p>
 
-                <div className="space-y-4 mt-auto">
-                  <div className="flex items-center gap-3 p-4 bg-pink-50/50 rounded-2xl border border-pink-100">
+                <div className="space-y-3 mt-auto">
+                  <div className="flex items-center gap-3 p-3 bg-pink-50/50 rounded-xl border border-pink-100">
                     <MapPin size={18} className="text-pink-500" />
                     <span className="text-slate-600 text-sm font-bold line-clamp-1">
                       {item.location}

@@ -94,20 +94,40 @@ export default function MatchResultsPage() {
     }
   };
 
+  const handleClearAll = async () => {
+    if (window.confirm("Are you sure you want to clear ALL matches? This cannot be undone.")) {
+      try {
+        for (const match of matches) {
+          await deleteMatch(match.id);
+        }
+        toast.success("All matches cleared successfully");
+        fetchMatches();
+      } catch (error: any) {
+        toast.error("Failed to clear some matches");
+      }
+    }
+  };
+
   const openChat = (match: Match) => {
     setSelectedMatch(match);
     setIsChatOpen(true);
   };
 
   return (
-    <div className="space-y-8 pb-12 relative z-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="max-w-5xl mx-auto space-y-6 pb-12 relative z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-4xl text-slate-800 font-black tracking-tighter uppercase">Match Results</h2>
-          <p className="text-slate-500 mt-2 text-lg font-medium">
-            AI-powered intelligence identifying potential item reunions
+          <h2 className="text-3xl text-slate-800 font-black tracking-tighter uppercase">Match Results</h2>
+          <p className="text-slate-500 mt-1 text-sm font-medium">
+            AI identifying potential item reunions
           </p>
         </div>
+        <Button 
+          onClick={handleClearAll}
+          className="bg-white/50 text-slate-500 hover:text-rose-500 border border-pink-100 px-6 py-3 rounded-xl transition-all font-black uppercase tracking-widest text-[9px] shadow-sm"
+        >
+          Clear All Matches
+        </Button>
       </div>
 
       {matches.length === 0 ? (
@@ -128,7 +148,7 @@ export default function MatchResultsPage() {
             <div
               key={match.id}
               ref={(el) => (matchRefs.current[match.id] = el)}
-              className={`bg-white/60 backdrop-blur-2xl rounded-[3rem] p-10 border border-pink-100 relative group overflow-hidden transition-all duration-500 ${match.status === 'RESOLVED' ? 'border-amber-400/50' : 'hover:border-sky-400/50'} ${isHighlighted ? 'ring-4 ring-sky-500 ring-offset-4 ring-offset-pink-50 scale-[1.01]' : ''}`}
+              className={`bg-white/60 backdrop-blur-2xl rounded-[2rem] p-8 border border-pink-100 relative group overflow-hidden transition-all duration-500 ${match.status === 'RESOLVED' ? 'border-amber-400/30' : 'hover:border-sky-400/30'} ${isHighlighted ? 'ring-2 ring-sky-500 ring-offset-2' : ''}`}
             >
               {match.status === 'RESOLVED' ? (
                 <div className="absolute top-4 right-[-45px] bg-amber-500 text-white text-[10px] font-black px-12 py-2 rotate-45 shadow-lg z-20 tracking-widest">
@@ -148,30 +168,30 @@ export default function MatchResultsPage() {
                 <Trash2 size={20} />
               </button>
 
-              <div className="flex items-center justify-between mb-10 flex-wrap gap-8">
-                <div className="flex items-center gap-8">
-                  <div className="w-16 h-16 bg-sky-500/10 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                    <CheckCircle className="text-sky-500" size={32} />
+              <div className="flex items-center justify-between mb-8 flex-wrap gap-6">
+                <div className="flex items-center gap-6">
+                  <div className="w-12 h-12 bg-sky-500/10 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                    <CheckCircle className="text-sky-500" size={24} />
                   </div>
                   <div>
-                    <h3 className="text-2xl text-slate-800 font-black tracking-tight uppercase">{match.status === 'RESOLVED' ? 'Item Successfully Recovered!' : 'AI Analysis Found a Match!'}</h3>
-                    <p className="text-slate-500 mt-1 font-medium">
-                      Matched on {new Date(match.matchDate).toLocaleDateString()}
+                    <h3 className="text-xl text-slate-800 font-black tracking-tight uppercase">{match.status === 'RESOLVED' ? 'Recovered!' : 'AI Analysis Match'}</h3>
+                    <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                      Matched {new Date(match.matchDate).toLocaleDateString()}
                     </p>
                   </div>
                   
-                  <div className="flex items-center gap-5 ml-8 bg-white/40 px-6 py-4 rounded-[1.5rem] border border-pink-50">
-                    <div className="relative w-14 h-14">
-                      <svg className="transform -rotate-90 w-14 h-14">
-                        <circle cx="28" cy="28" r="24" stroke="#f1f5f9" strokeWidth="6" fill="none" />
+                  <div className="flex items-center gap-4 ml-6 bg-white/40 px-4 py-3 rounded-2xl border border-pink-50">
+                    <div className="relative w-10 h-10">
+                      <svg className="transform -rotate-90 w-10 h-10">
+                        <circle cx="20" cy="20" r="17" stroke="#f1f5f9" strokeWidth="4" fill="none" />
                         <circle
-                          cx="28" cy="28" r="24" stroke="#0ea5e9" strokeWidth="6" fill="none"
-                          strokeDasharray={`${Math.round((match.confidence / 100) * 150.8)} 150.8`}
+                          cx="20" cy="20" r="17" stroke="#0ea5e9" strokeWidth="4" fill="none"
+                          strokeDasharray={`${Math.round((match.confidence / 100) * 106.8)} 106.8`}
                           strokeLinecap="round"
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-[10px] font-black text-sky-600">{Math.round(match.confidence)}%</span>
+                        <span className="text-[8px] font-black text-sky-600">{Math.round(match.confidence)}%</span>
                       </div>
                     </div>
                     <div>

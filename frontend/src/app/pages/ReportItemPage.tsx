@@ -197,8 +197,8 @@ export default function ReportItemPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 relative z-10">
-      <div className="bg-white/60 backdrop-blur-3xl rounded-[3.5rem] shadow-2xl p-12 border border-pink-100">
+    <div className="max-w-2xl mx-auto pb-8 relative z-10">
+      <div className="bg-white/60 backdrop-blur-3xl rounded-[2.5rem] shadow-xl p-8 border border-pink-100">
         <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
           <div>
             <h2 className="text-4xl text-slate-800 font-black tracking-tight flex items-center gap-3 uppercase">
