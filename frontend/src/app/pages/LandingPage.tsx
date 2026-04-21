@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ShieldCheck, Zap, ArrowRight, Brain } from 'lucide-react';
+import { Search, ShieldCheck, Zap, ArrowRight, Brain, HelpCircle } from 'lucide-react';
 import TextType from '../components/ui/TextType';
 import bgImage from '../../assets/background.png';
 import Prism from '../components/ui/Prism';
+import UserGuideModal from '../components/UserGuideModal';
 
 export default function LandingPage() {
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-sky-50 to-white font-sans text-slate-800 overflow-x-hidden relative">
       
@@ -41,6 +45,10 @@ export default function LandingPage() {
           </div>
           
           <div className="hidden md:flex items-center gap-10">
+            <button onClick={() => setIsGuideOpen(true)} className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-sky-500 transition-colors">
+              <HelpCircle className="w-4 h-4" />
+              How It Works
+            </button>
             <a href="#intelligence" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-sky-500 transition-colors">Intelligence</a>
             <a href="#protocols" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-sky-500 transition-colors">Protocols</a>
           </div>
@@ -53,6 +61,8 @@ export default function LandingPage() {
           </div>
         </div>
       </nav>
+
+      <UserGuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
 
       {/* Hero Section */}
       <div className="relative z-10 pt-48 pb-32 lg:pt-64 lg:pb-48">

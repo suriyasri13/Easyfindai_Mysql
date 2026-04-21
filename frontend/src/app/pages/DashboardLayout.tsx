@@ -28,12 +28,15 @@ import AIChatPanel from '../components/AIChatPanel';
 import bgImage from '../../assets/background.png';
 import Prism from '../components/ui/Prism';
 
+import UserGuideModal from '../components/UserGuideModal';
+
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -137,6 +140,9 @@ export default function DashboardLayout() {
           </div>
 
           <div className="flex items-center gap-6">
+            <button onClick={() => setIsGuideOpen(true)} className="text-slate-400 hover:text-pink-500 transition-all">
+              <HelpCircle size={20} />
+            </button>
             <button onClick={() => navigate('/')} className="text-slate-400 hover:text-sky-500 transition-all">
               <Home size={20} />
             </button>
@@ -202,6 +208,7 @@ export default function DashboardLayout() {
       </div>
 
       <AIChatPanel isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      <UserGuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
 
       {isSidebarOpen && (
         <div className="fixed inset-0 bg-pink-900/20 backdrop-blur-sm z-20 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
