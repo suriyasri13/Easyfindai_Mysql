@@ -1,4 +1,6 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:8080/ws";
+export const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL || "http://localhost:8080/uploads";
 
 export const getMatches = async (userId?: string | number) => {
   const url = userId ? `${BASE_URL}/match?userId=${userId}` : `${BASE_URL}/match`;

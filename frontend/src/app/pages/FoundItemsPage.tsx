@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, User, Phone, Search, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import ConfirmModal from '../components/ui/ConfirmModal';
-import { getFoundItems, deleteFoundItem } from "../services/api";
+import { getFoundItems, deleteFoundItem, UPLOADS_URL } from "../services/api";
 import { toast } from "sonner";
 
 interface Item {
@@ -55,7 +55,7 @@ export default function FoundItemsPage() {
         contactInfo: item.contactInfo || item.finder?.email || "",
         date: item.dateFound,
         location: item.location,
-        image: item.imagePath ? `http://localhost:8080/uploads/${item.imagePath}` : null,
+        image: item.imagePath ? `${UPLOADS_URL}/${item.imagePath}` : null,
         userName: item.finder?.name || "Unknown",
         userId: item.finder?.userId || "",
         type: "found",

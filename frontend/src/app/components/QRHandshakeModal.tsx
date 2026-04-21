@@ -5,6 +5,7 @@ import { X, QrCode, Camera, CheckCircle2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { BASE_URL } from '../services/api';
 
 interface QRHandshakeModalProps {
   isOpen: boolean;
@@ -55,7 +56,7 @@ export default function QRHandshakeModal({ isOpen, onClose, match, userRole, onS
 
   const handleVerify = async (key: string) => {
     try {
-      await axios.post(`http://localhost:8080/api/match/${match.id}/handshake`, { key });
+      await axios.post(`${BASE_URL}/match/${match.id}/handshake`, { key });
       setSuccess(true);
       toast.success("Handshake Successful! Item marked as returned.");
       setTimeout(() => {

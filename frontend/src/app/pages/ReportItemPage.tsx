@@ -16,7 +16,7 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import ConfirmModal from '../components/ui/ConfirmModal';
-import { reportItem } from "../services/api";
+import { reportItem, BASE_URL } from "../services/api";
 
 
 export default function ReportItemPage() {
@@ -94,7 +94,7 @@ export default function ReportItemPage() {
       setIsParsing(true);
       try {
         const prompt = `Extract item details: "${transcript}". Return JSON: itemName, category, description, location, date.`;
-        const res = await fetch('http://localhost:8080/api/ai/parse-report', {
+        const res = await fetch(`${BASE_URL}/ai/parse-report`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt })

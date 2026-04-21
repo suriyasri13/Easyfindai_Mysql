@@ -4,7 +4,7 @@ import { Calendar, MapPin, User, Trash2 } from "lucide-react";
 import { Package } from "lucide-react";
 import { Button } from "../components/ui/button";
 import ConfirmModal from "../components/ui/ConfirmModal";
-import { getLostItems, deleteLostItem } from "../services/api";
+import { getLostItems, deleteLostItem, UPLOADS_URL } from "../services/api";
 import { toast } from "sonner";
 
 interface Item {
@@ -56,7 +56,7 @@ export default function LostItemsPage() {
         contactInfo: item.user?.email || "",
         date: item.dateLost,
         location: item.location,
-        image: item.imagePath ? `http://localhost:8080/uploads/${item.imagePath}` : null,
+        image: item.imagePath ? `${UPLOADS_URL}/${item.imagePath}` : null,
         userName: item.user?.name || "Unknown",
         userId: item.user?.userId || "",
         type: "lost",

@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { Package, Search, CheckCircle, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { BASE_URL } from '../services/api';
 
 export default function DashboardHome() {
 
@@ -17,7 +18,7 @@ export default function DashboardHome() {
 
   useEffect(() => {
 
-    axios.get("http://localhost:8080/api/dashboard/stats")
+    axios.get(`${BASE_URL}/dashboard/stats`)
       .then(res => {
         setStatsData(res.data);
       })

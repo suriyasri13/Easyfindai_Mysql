@@ -2,7 +2,7 @@ import { X, Send } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { getChatMessages, sendChatMessage, ChatMessage, initiateChat } from '../services/api';
+import { getChatMessages, sendChatMessage, ChatMessage, initiateChat, SOCKET_URL } from '../services/api';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { verifySerialNumber } from '../services/api';
@@ -55,7 +55,7 @@ export default function PersonalMatchChat({ isOpen, onClose, match }: PersonalMa
     fetchMessages();
 
     // 2. Setup STOMP WebSocket for 0-latency chat
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS(SOCKET_URL);
     const stompClient = new Client({
       webSocketFactory: () => socket as any,
       debug: (str) => console.log(str),

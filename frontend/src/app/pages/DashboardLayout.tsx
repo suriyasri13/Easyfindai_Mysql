@@ -19,7 +19,8 @@ import {
   getUnreadNotificationCount, 
   getGlobalNotifications, 
   getNotifications, 
-  markNotificationAsRead 
+  markNotificationAsRead,
+  SOCKET_URL
 } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
@@ -43,7 +44,7 @@ export default function DashboardLayout() {
 
     fetchInitialUnreadCount();
 
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS(SOCKET_URL);
     const stompClient = new Client({
       webSocketFactory: () => socket as any,
       reconnectDelay: 5000,
