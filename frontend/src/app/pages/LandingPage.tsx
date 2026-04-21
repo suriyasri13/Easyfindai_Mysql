@@ -62,12 +62,12 @@ export default function LandingPage() {
             <span>Neural Reconciliation Engine v4.0</span>
           </div>
 
-          <div className="mb-6">
+          <div className="mb-8">
              <TextType 
-              text={["EaseFind.AI", "Intelligence Platform", "Next-Gen Protocol"]}
-              typingSpeed={100}
-              pauseDuration={1500}
-              className="text-2xl font-black tracking-[0.4em] uppercase text-sky-500 opacity-60"
+              text={["EaseFind.AI"]}
+              typingSpeed={120}
+              pauseDuration={3000}
+              className="text-4xl lg:text-5xl font-black tracking-[0.2em] uppercase text-sky-500"
             />
           </div>
           
