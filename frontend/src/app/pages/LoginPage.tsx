@@ -7,7 +7,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import { loginUser } from "../services/api";
-import bgImage from '../assets/background.png';
+import bgImage from '../../assets/background.png';
 import Prism from '../components/ui/Prism';
 
 export default function LoginPage() {
