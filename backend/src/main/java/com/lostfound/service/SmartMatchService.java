@@ -103,63 +103,66 @@ public class SmartMatchService {
 
         double confidenceScore = 0.0;
         boolean isMatch = false;
-        String combinedReason = "AI visual & text similarity";
+        String combinedReason = "AI Analysis";
 
         String lostName = lost.getItemName().toLowerCase().trim();
         String foundName = found.getItemName().toLowerCase().trim();
         
-        if (lostName.contains(foundName) || foundName.contains(lostName)) {
-            isMatch = true;
-            confidenceScore = 0.8;
-            combinedReason = "Item names are very similar";
-        }
+        // Calculate dynamic name similarity for baseline
+        double nameSimilarity = calculateSimilarity(lostName, foundName);
+        
+        try {
+            File lostImage = (lost.getImagePath() != null) ? new File(UPLOAD_DIR + lost.getImagePath()) : null;
+            File foundImage = (found.getImagePath() != null) ? new File(UPLOAD_DIR + found.getImagePath()) : null;
 
-        if (!isMatch) {
-            try {
-                File lostImage = (lost.getImagePath() != null) ? new File(UPLOAD_DIR + lost.getImagePath()) : null;
-                File foundImage = (found.getImagePath() != null) ? new File(UPLOAD_DIR + found.getImagePath()) : null;
+            String jsonResponse = aiService.callAI(
+                lostImage, 
+                foundImage, 
+                lost.getDescription() != null ? lost.getDescription() : lost.getItemName(), 
+                found.getDescription() != null ? found.getDescription() : found.getItemName()
+            );
 
-                String jsonResponse = aiService.callAI(
-                    lostImage, 
-                    foundImage, 
-                    lost.getDescription() != null ? lost.getDescription() : lost.getItemName(), 
-                    found.getDescription() != null ? found.getDescription() : found.getItemName()
-                );
+            JsonNode root = objectMapper.readTree(jsonResponse);
+            if (root.has("final_score")) {
+                confidenceScore = root.get("final_score").asDouble();
+                double textScore = root.path("text_score").asDouble();
+                double imageScore = root.path("image_score").asDouble();
+                
+                List<String> reasons = new ArrayList<>();
+                if (imageScore > 0.6) reasons.add("AI visual similarity");
+                if (textScore > 0.6) reasons.add("Matching descriptions");
+                if (nameSimilarity > 0.8) reasons.add("Strong name match");
+                
+                combinedReason = reasons.isEmpty() ? "AI comparison" : String.join(", ", reasons);
 
-                JsonNode root = objectMapper.readTree(jsonResponse);
-                if (root.has("final_score")) {
-                    confidenceScore = root.get("final_score").asDouble();
-                    double textScore = root.path("text_score").asDouble();
-                    double imageScore = root.path("image_score").asDouble();
-                    
-                    List<String> reasons = new ArrayList<>();
-                    if (imageScore > 0.6) reasons.add("AI visual similarity");
-                    if (textScore > 0.6) reasons.add("Matching descriptions");
-                    combinedReason = reasons.isEmpty() ? "AI comparison" : String.join(", ", reasons);
-
-                    if (confidenceScore > 0.45 || (textScore > 0.9)) {
-                        isMatch = true;
+                if (confidenceScore > 0.45 || textScore > 0.85 || nameSimilarity > 0.9) {
+                    isMatch = true;
+                    // Boost confidence if names match perfectly
+                    if (lostName.equals(foundName)) {
+                        confidenceScore = Math.max(confidenceScore, 0.95);
                     }
                 }
-            } catch (Exception e) {
-                if (lost.getItemName().equalsIgnoreCase(found.getItemName())) {
-                    isMatch = true;
-                    confidenceScore = 0.75;
-                    combinedReason = "Exact name match";
-                }
             }
-        }
- else if (!isMatch) { // Fallback if no images
-             if (lost.getItemName().equalsIgnoreCase(found.getItemName())) {
+        } catch (Exception e) {
+            // Fallback to purely name-based similarity if AI is offline
+            if (nameSimilarity > 0.7) {
                 isMatch = true;
-                confidenceScore = 0.75;
-                combinedReason = "Exact name match";
+                confidenceScore = nameSimilarity;
+                combinedReason = "Textual similarity match";
             }
         }
 
         if (isMatch) {
             saveMatchAndNotify(lost, found, confidenceScore, combinedReason);
         }
+    }
+
+    private double calculateSimilarity(String s1, String s2) {
+        if (s1.equals(s2)) return 1.0;
+        if (s1.contains(s2) || s2.contains(s1)) {
+            return (double) Math.min(s1.length(), s2.length()) / Math.max(s1.length(), s2.length()) * 0.9;
+        }
+        return 0.0; // Simplify for now, could use Levenshtein
     }
 
     private void saveMatchAndNotify(LostItem lost, FoundItem found, double confidence, String reason) {
