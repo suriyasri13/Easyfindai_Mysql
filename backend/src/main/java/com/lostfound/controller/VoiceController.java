@@ -31,8 +31,29 @@ public class VoiceController {
             return ResponseEntity.ok(aiResponse.getBody());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", "Local AI service is offline. Please ensure Python AI server is running."));
+            System.err.println("VOICE_AI_ERROR: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "AI Service Connection Failed",
+                "details", e.getMessage(),
+                "suggestion", "Please restart your Python AI server (AI/api/app.py) and ensure it is listening on port 5000."
+            ));
+        }
+    }
+
+    @PostMapping("/verify-image")
+    public ResponseEntity<?> verifyImage(@RequestParam("image") org.springframework.web.multipart.MultipartFile image) {
+        try {
+            org.springframework.util.MultiValueMap<String, Object> body = new org.springframework.util.LinkedMultiValueMap<>();
+            body.add("image", image.getResource());
+
+            org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, Object>> requestEntity = 
+                new org.springframework.http.HttpEntity<>(body, new org.springframework.http.HttpHeaders());
+
+            ResponseEntity<Map> aiResponse = restTemplate.postForEntity("http://localhost:5000/verify-image", requestEntity, Map.class);
+            return ResponseEntity.ok(aiResponse.getBody());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Image verification service offline: " + e.getMessage()));
         }
     }
 }

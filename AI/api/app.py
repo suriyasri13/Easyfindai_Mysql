@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.feature_extractor import extract_image_features
 from utils.matcher import match_image_features, deep_text_similarity
 from utils.voice_parser import parse_voice_transcript
+from utils.image_verifier import verify_image_authenticity
 
 app = Flask(__name__)
 
@@ -115,6 +116,24 @@ def voice_parse():
     except Exception as e:
         print(f"VOICE_AI -> Error: {str(e)}")
         return jsonify({"error": f"Internal AI error: {str(e)}"}), 500
+
+@app.route("/verify-image", methods=["POST"])
+def verify_image():
+    if "image" not in request.files:
+        return jsonify({"error": "No image provided"}), 400
+        
+    image_file = request.files["image"]
+    temp_path = os.path.join(UPLOAD_FOLDER, "verify_" + image_file.filename)
+    image_file.save(temp_path)
+    
+    try:
+        result = verify_image_authenticity(temp_path)
+        os.remove(temp_path) # Cleanup
+        return jsonify(result)
+    except Exception as e:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(port=5000, host='0.0.0.0', debug=True)
