@@ -61,6 +61,15 @@ export default function LandingPage() {
             <Zap size={14} className="fill-pink-500 animate-pulse" />
             <span>Neural Reconciliation Engine v4.0</span>
           </div>
+
+          <div className="mb-6">
+             <TextType 
+              text={["EaseFind.AI", "Intelligence Platform", "Next-Gen Protocol"]}
+              typingSpeed={100}
+              pauseDuration={1500}
+              className="text-2xl font-black tracking-[0.4em] uppercase text-sky-500 opacity-60"
+            />
+          </div>
           
           <h1 className="text-6xl lg:text-8xl font-black text-slate-800 tracking-tighter mb-10 leading-[1.05]">
             Recover what matters <br />
