@@ -194,8 +194,8 @@ public class ItemController {
     // ---------------- HELPERS ----------------
 
     private String saveImage(MultipartFile image) throws Exception {
-        // Use a guaranteed absolute path to prevent any IDE or Tomcat temp directory issues
-        String baseDir = "C:\\Users\\HP\\OneDrive\\Desktop\\smart-lost-found-system-main - Copy\\backend\\uploads\\";
+        // Use a relative path to support Linux cloud environments (e.g. Railway)
+        String baseDir = "./uploads/";
         File uploadFolder = new File(baseDir);
         if (!uploadFolder.exists()) {
             uploadFolder.mkdirs();

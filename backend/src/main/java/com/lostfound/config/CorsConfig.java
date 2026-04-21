@@ -19,16 +19,16 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
 
                 registry.addMapping("/**")
-                        .allowedOriginPatterns("*") // FIX
+                        .allowedOriginPatterns("http://localhost:5173", "https://*.vercel.app")
                         .allowedMethods("*")
                         .allowedHeaders("*")
-                        .allowCredentials(false);   // FIX
+                        .allowCredentials(true);
             }
 
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
                 registry.addResourceHandler("/uploads/**")
-                        .addResourceLocations("file:///C:/Users/HP/OneDrive/Desktop/smart-lost-found-system-main - Copy/backend/uploads/");
+                        .addResourceLocations("file:./uploads/");
             }
         };
     }
