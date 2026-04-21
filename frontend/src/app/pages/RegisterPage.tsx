@@ -7,6 +7,7 @@ import { Label } from "../components/ui/label";
 import { toast } from "sonner";
 import { registerUser } from "../services/api";
 import bgImage from '../assets/background.png';
+import Prism from '../components/ui/Prism';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -72,7 +73,20 @@ export default function RegisterPage() {
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-[20s] scale-110 animate-slow-zoom"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
-        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px]"></div>
+        <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px] z-10"></div>
+        <div className="absolute inset-0 z-0 opacity-40">
+           <Prism
+            animationType="rotate"
+            timeScale={0.5}
+            height={3.5}
+            baseWidth={5.5}
+            scale={3.6}
+            hueShift={0}
+            colorFrequency={1}
+            noise={0}
+            glow={1}
+          />
+        </div>
       </div>
 
       <div className="w-full max-w-[450px] relative z-10 px-4 py-8">
