@@ -73,7 +73,7 @@ export default function RegisterPage() {
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-[20s] scale-110 animate-slow-zoom"
         style={{ backgroundImage: `url(${bgImage})` }}
       >
-        <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px] z-10"></div>
+        <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[2px] z-10"></div>
         <div className="absolute inset-0 z-0 opacity-40">
            <Prism
             animationType="rotate"
