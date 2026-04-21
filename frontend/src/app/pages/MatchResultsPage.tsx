@@ -103,20 +103,20 @@ export default function MatchResultsPage() {
     <div className="space-y-8 pb-12 relative z-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-4xl text-white font-black tracking-tighter uppercase">Match Results</h2>
-          <p className="text-slate-400 mt-2 text-lg font-medium">
+          <h2 className="text-4xl text-slate-800 font-black tracking-tighter uppercase">Match Results</h2>
+          <p className="text-slate-500 mt-2 text-lg font-medium">
             AI-powered intelligence identifying potential item reunions
           </p>
         </div>
       </div>
 
       {matches.length === 0 ? (
-        <div className="bg-white/5 backdrop-blur-2xl rounded-[3rem] p-24 text-center border border-white/10 shadow-2xl">
-          <div className="w-24 h-24 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8">
-            <CheckCircle size={48} className="text-slate-500" />
+        <div className="bg-white/40 backdrop-blur-2xl rounded-[3rem] p-24 text-center border border-pink-100 shadow-xl">
+          <div className="w-24 h-24 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-8">
+            <CheckCircle size={48} className="text-pink-300" />
           </div>
-          <p className="text-white text-3xl font-black mb-3 tracking-tight uppercase">No matches found yet</p>
-          <p className="text-slate-400 text-lg font-medium">
+          <p className="text-slate-800 text-3xl font-black mb-3 tracking-tight uppercase">No matches found yet</p>
+          <p className="text-slate-500 text-lg font-medium">
             Our AI is continuously analyzing reports to find your belongings.
           </p>
         </div>
@@ -128,21 +128,21 @@ export default function MatchResultsPage() {
             <div
               key={match.id}
               ref={(el) => (matchRefs.current[match.id] = el)}
-              className={`bg-white/5 backdrop-blur-2xl rounded-[3rem] p-10 border border-white/10 relative group overflow-hidden transition-all duration-500 ${match.status === 'RESOLVED' ? 'border-amber-500/50' : 'hover:border-blue-500/50'} ${isHighlighted ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-slate-950 scale-[1.01]' : ''}`}
+              className={`bg-white/60 backdrop-blur-2xl rounded-[3rem] p-10 border border-pink-100 relative group overflow-hidden transition-all duration-500 ${match.status === 'RESOLVED' ? 'border-amber-400/50' : 'hover:border-sky-400/50'} ${isHighlighted ? 'ring-4 ring-sky-500 ring-offset-4 ring-offset-pink-50 scale-[1.01]' : ''}`}
             >
               {match.status === 'RESOLVED' ? (
                 <div className="absolute top-4 right-[-45px] bg-amber-500 text-white text-[10px] font-black px-12 py-2 rotate-45 shadow-lg z-20 tracking-widest">
                   RECOVERED
                 </div>
               ) : (
-                <div className="absolute top-4 right-[-40px] bg-blue-500 text-white text-[10px] font-black px-12 py-2 rotate-45 shadow-lg z-20 tracking-widest">
+                <div className="absolute top-4 right-[-40px] bg-sky-500 text-white text-[10px] font-black px-12 py-2 rotate-45 shadow-lg z-20 tracking-widest">
                   AI MATCH
                 </div>
               )}
 
               <button
                 onClick={() => handleDeleteMatch(match.id)}
-                className="absolute top-8 right-16 p-4 bg-slate-900/80 backdrop-blur-md hover:bg-rose-500 text-slate-400 hover:text-white rounded-2xl transition-all opacity-0 group-hover:opacity-100 z-30"
+                className="absolute top-8 right-16 p-4 bg-white/80 backdrop-blur-md hover:bg-pink-500 text-slate-400 hover:text-white rounded-2xl transition-all opacity-0 group-hover:opacity-100 z-30"
                 title="Clear Match"
               >
                 <Trash2 size={20} />
@@ -150,33 +150,33 @@ export default function MatchResultsPage() {
 
               <div className="flex items-center justify-between mb-10 flex-wrap gap-8">
                 <div className="flex items-center gap-8">
-                  <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                    <CheckCircle className="text-blue-400" size={32} />
+                  <div className="w-16 h-16 bg-sky-500/10 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                    <CheckCircle className="text-sky-500" size={32} />
                   </div>
                   <div>
-                    <h3 className="text-2xl text-white font-black tracking-tight uppercase">{match.status === 'RESOLVED' ? 'Item Successfully Recovered!' : 'AI Analysis Found a Match!'}</h3>
-                    <p className="text-slate-400 mt-1 font-medium">
+                    <h3 className="text-2xl text-slate-800 font-black tracking-tight uppercase">{match.status === 'RESOLVED' ? 'Item Successfully Recovered!' : 'AI Analysis Found a Match!'}</h3>
+                    <p className="text-slate-500 mt-1 font-medium">
                       Matched on {new Date(match.matchDate).toLocaleDateString()}
                     </p>
                   </div>
                   
-                  <div className="flex items-center gap-5 ml-8 bg-white/5 px-6 py-4 rounded-[1.5rem] border border-white/5">
+                  <div className="flex items-center gap-5 ml-8 bg-white/40 px-6 py-4 rounded-[1.5rem] border border-pink-50">
                     <div className="relative w-14 h-14">
                       <svg className="transform -rotate-90 w-14 h-14">
-                        <circle cx="28" cy="28" r="24" stroke="rgba(255,255,255,0.05)" strokeWidth="6" fill="none" />
+                        <circle cx="28" cy="28" r="24" stroke="#f1f5f9" strokeWidth="6" fill="none" />
                         <circle
-                          cx="28" cy="28" r="24" stroke="#3b82f6" strokeWidth="6" fill="none"
+                          cx="28" cy="28" r="24" stroke="#0ea5e9" strokeWidth="6" fill="none"
                           strokeDasharray={`${Math.round((match.confidence / 100) * 150.8)} 150.8`}
                           strokeLinecap="round"
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-[10px] font-black text-blue-400">{Math.round(match.confidence)}%</span>
+                        <span className="text-[10px] font-black text-sky-600">{Math.round(match.confidence)}%</span>
                       </div>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Confidence Score</p>
-                      <p className="text-lg font-black text-white uppercase tracking-tight">AI Precision</p>
+                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Confidence Score</p>
+                      <p className="text-lg font-black text-slate-800 uppercase tracking-tight">AI Precision</p>
                     </div>
                   </div>
                 </div>
@@ -184,7 +184,7 @@ export default function MatchResultsPage() {
                 <div className="flex gap-4">
                   <Button
                     onClick={() => openChat(match)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-xl shadow-blue-500/20"
+                    className="bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-lg shadow-sky-100"
                   >
                     <MessageSquare size={18} className="mr-3" />
                     Open Chat
@@ -193,7 +193,7 @@ export default function MatchResultsPage() {
                   {match.status !== 'RESOLVED' && (
                     <Button
                       onClick={() => { setSelectedMatch(match); setIsQRModalOpen(true); }}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-xl shadow-indigo-500/20"
+                      className="bg-pink-500 hover:bg-pink-600 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-lg shadow-pink-100"
                     >
                       <QrCode size={18} className="mr-3" />
                       {match.lostItem.userId?.toString() === user?.userId?.toString() ? "Generate QR" : "Scan QR"}
@@ -203,7 +203,7 @@ export default function MatchResultsPage() {
                   {match.status !== 'RESOLVED' && (
                     <Button
                       onClick={() => handleConfirmMatch(match.id)}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-xl shadow-emerald-500/20"
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] py-6 px-8 rounded-2xl transition-all shadow-lg shadow-emerald-100"
                     >
                       <CheckCircle size={18} className="mr-3" />
                       Mark Recovered
@@ -212,29 +212,29 @@ export default function MatchResultsPage() {
                 </div>
               </div>
 
-              <div className="mb-10 p-5 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
-                <p className="text-sm text-blue-400 font-black uppercase tracking-widest flex items-center gap-3">
-                  <span className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span>
+              <div className="mb-10 p-5 bg-sky-500/10 border border-sky-500/20 rounded-2xl">
+                <p className="text-sm text-sky-600 font-black uppercase tracking-widest flex items-center gap-3">
+                  <span className="w-3 h-3 bg-sky-500 rounded-full animate-pulse"></span>
                   Key Intelligence Factors: {match.matchReason.join(', ')}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 {/* Lost Item */}
-                <div className="bg-white/5 rounded-[2.5rem] p-8 border border-white/5 relative group/item hover:bg-white/10 transition-all duration-500">
+                <div className="bg-white/40 rounded-[2.5rem] p-8 border border-pink-50 relative group/item hover:bg-white/60 transition-all duration-500">
                   {match.lostItem.isConfidential && (
-                    <div className="absolute top-6 right-6 bg-amber-500/20 text-amber-400 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-500/20">
+                    <div className="absolute top-6 right-6 bg-amber-100 text-amber-600 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-200">
                       🔐 Protected
                     </div>
                   )}
                   <div className="flex items-center gap-4 mb-8">
-                    <span className="px-4 py-1.5 bg-rose-500 text-white text-[10px] rounded-xl font-black tracking-widest uppercase shadow-md">
+                    <span className="px-4 py-1.5 bg-pink-500 text-white text-[10px] rounded-xl font-black tracking-widest uppercase shadow-md">
                       LOST
                     </span>
-                    <h4 className="text-2xl text-white font-black tracking-tight uppercase">{match.lostItem.itemName}</h4>
+                    <h4 className="text-2xl text-slate-800 font-black tracking-tight uppercase">{match.lostItem.itemName}</h4>
                   </div>
                   {match.lostItem.image && (
-                    <div className="rounded-2xl overflow-hidden mb-6 shadow-2xl aspect-video border border-white/5">
+                    <div className="rounded-2xl overflow-hidden mb-6 shadow-xl aspect-video border border-pink-50">
                       <img
                         src={match.lostItem.image}
                         alt={match.lostItem.itemName}
@@ -242,37 +242,37 @@ export default function MatchResultsPage() {
                       />
                     </div>
                   )}
-                  <p className="text-sm text-slate-400 mb-8 leading-relaxed font-medium line-clamp-3">
+                  <p className="text-sm text-slate-500 mb-8 leading-relaxed font-medium line-clamp-3">
                     {match.lostItem.description}
                   </p>
-                  <div className="flex items-center justify-between pt-6 border-t border-white/5">
-                    <p className="text-sm text-white font-black uppercase tracking-widest flex items-center gap-3">
-                      <div className="p-2 bg-white/5 text-rose-400 rounded-xl">
+                  <div className="flex items-center justify-between pt-6 border-t border-pink-50">
+                    <p className="text-sm text-slate-800 font-black uppercase tracking-widest flex items-center gap-3">
+                      <div className="p-2 bg-pink-50 text-pink-500 rounded-xl">
                         <User size={18} />
                       </div>
                       {match.lostItem.userName}
                     </p>
-                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
                       {new Date(match.lostItem.date).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
 
                 {/* Found Item */}
-                <div className="bg-white/5 rounded-[2.5rem] p-8 border border-white/5 relative group/item hover:bg-white/10 transition-all duration-500">
+                <div className="bg-white/40 rounded-[2.5rem] p-8 border border-sky-50 relative group/item hover:bg-white/60 transition-all duration-500">
                   {match.foundItem.isConfidential && (
-                    <div className="absolute top-6 right-6 bg-amber-500/20 text-amber-400 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-500/20">
+                    <div className="absolute top-6 right-6 bg-amber-100 text-amber-600 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border border-amber-200">
                       🔐 Protected
                     </div>
                   )}
                   <div className="flex items-center gap-4 mb-8">
-                    <span className="px-4 py-1.5 bg-blue-500 text-white text-[10px] rounded-xl font-black tracking-widest uppercase shadow-md">
+                    <span className="px-4 py-1.5 bg-sky-500 text-white text-[10px] rounded-xl font-black tracking-widest uppercase shadow-md">
                       FOUND
                     </span>
-                    <h4 className="text-2xl text-white font-black tracking-tight uppercase">{match.foundItem.itemName}</h4>
+                    <h4 className="text-2xl text-slate-800 font-black tracking-tight uppercase">{match.foundItem.itemName}</h4>
                   </div>
                   {match.foundItem.image && (
-                    <div className="rounded-2xl overflow-hidden mb-6 shadow-2xl aspect-video border border-white/5">
+                    <div className="rounded-2xl overflow-hidden mb-6 shadow-xl aspect-video border border-sky-50">
                       <img
                         src={match.foundItem.image}
                         alt={match.foundItem.itemName}
@@ -280,17 +280,17 @@ export default function MatchResultsPage() {
                       />
                     </div>
                   )}
-                  <p className="text-sm text-slate-400 mb-8 leading-relaxed font-medium line-clamp-3">
+                  <p className="text-sm text-slate-500 mb-8 leading-relaxed font-medium line-clamp-3">
                     {match.foundItem.description}
                   </p>
-                  <div className="flex items-center justify-between pt-6 border-t border-white/5">
-                    <p className="text-sm text-white font-black uppercase tracking-widest flex items-center gap-3">
-                      <div className="p-2 bg-white/5 text-blue-400 rounded-xl">
+                  <div className="flex items-center justify-between pt-6 border-t border-sky-50">
+                    <p className="text-sm text-slate-800 font-black uppercase tracking-widest flex items-center gap-3">
+                      <div className="p-2 bg-sky-50 text-sky-500 rounded-xl">
                         <User size={18} />
                       </div>
                       {match.foundItem.userName}
                     </p>
-                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
                       {new Date(match.foundItem.date).toLocaleDateString()}
                     </p>
                   </div>

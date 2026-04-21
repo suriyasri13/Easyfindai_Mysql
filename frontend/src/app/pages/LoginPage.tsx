@@ -1,223 +1,142 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Sparkles, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { Mail, Lock, Search, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
-import { loginUser } from "../services/api";
 import bgImage from '../../assets/background.png';
 import Prism from '../components/ui/Prism';
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-
-  const validateEmail = (email: string) => {
-    if (!email.includes('@')) {
-      return 'Email must contain "@"';
-    }
-    if (!email.endsWith('.com')) {
-      return 'Email must end with ".com"';
-    }
-    return '';
-  };
-
-  const validatePassword = (password: string) => {
-    if (password.length < 8) {
-      return 'Password must be at least 8 characters';
-    }
-    if (!/[A-Z]/.test(password)) {
-      return 'Password must contain at least 1 capital letter';
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      return 'Password must contain at least 1 special character';
-    }
-    return '';
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  const emailError = validateEmail(email);
-  const passwordError = validatePassword(password);
-
-  if (emailError || passwordError) {
-    setErrors({ email: emailError, password: passwordError });
-    return;
-  }
-
-  setErrors({});
-  setLoading(true);
-
-  try {
-    const response = await loginUser({
-      email,
-      password,
-    });
-
-    login(
-      {
-        userId: response.userId,
-        email: response.email,
-        name: response.fullName,
-        role: "USER",
-      },
-      response.token
-    );
-
-    toast.success("Login successful!");
-    navigate("/dashboard");
-
-  } catch (error: any) {
-    setErrors({
-      email: "Invalid email or password",
-    });
-
-    toast.error(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      toast.success('Access Granted', { description: 'Secure session initialized.' });
+      navigate('/dashboard');
+    } catch (error) {
+      toast.error('Access Denied', { description: 'Invalid credentials protocol.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-sky-50 to-white font-sans p-6 relative overflow-hidden">
       
-      {/* Immersive Background Image with Dark Overlay */}
-      <div 
-        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-[20s] scale-110 animate-slow-zoom"
-        style={{ backgroundImage: `url(${bgImage})` }}
-      >
-        <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[2px] z-10"></div>
-        <div className="absolute inset-0 z-0 opacity-40">
+      {/* Background Layer */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.05] mix-blend-multiply scale-110"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-100/20 via-sky-100/20 to-white/40 backdrop-blur-[1px] z-10"></div>
+        <div className="absolute inset-0 z-0 opacity-20">
            <Prism
             animationType="rotate"
-            timeScale={0.5}
-            height={3.5}
-            baseWidth={5.5}
-            scale={3.6}
-            hueShift={0}
-            colorFrequency={1}
+            timeScale={0.2}
+            height={5}
+            baseWidth={7}
+            scale={4.0}
+            hueShift={280}
+            colorFrequency={0.5}
             noise={0}
-            glow={1}
+            glow={0.5}
           />
         </div>
       </div>
 
-      <div className="w-full max-w-[420px] relative z-10 px-4">
-        {/* Glassmorphic Login Card */}
-        <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden">
-          
-          <div className="py-10 px-8 text-center">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-500/20 rotate-3 group">
-              <Sparkles className="text-white group-hover:scale-125 transition-transform" size={32} />
-            </div>
-            <h1 className="text-3xl font-black mb-2 tracking-tighter text-white">Welcome back</h1>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">
-              Securely access your intelligence dashboard
-            </p>
+      <div className="w-full max-w-md relative z-10">
+        {/* Logo Section */}
+        <div className="flex flex-col items-center mb-10 animate-in fade-in slide-in-from-top-8 duration-1000">
+          <div className="p-4 bg-sky-500 rounded-[2rem] shadow-2xl shadow-sky-200 mb-6 group cursor-pointer hover:rotate-12 transition-transform duration-500">
+            <Search className="text-white w-10 h-10" />
           </div>
+          <h1 className="text-4xl font-black text-slate-800 tracking-tighter mb-2">EaseFind<span className="text-sky-500">.AI</span></h1>
+          <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Secure Intelligence Access</p>
+        </div>
 
-          <div className="px-8 pb-12">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300 font-bold text-xs uppercase tracking-widest ml-1">
-                  Email Address
-                </Label>
-                <div className="relative">
+        {/* Login Card */}
+        <div className="bg-white/60 backdrop-blur-3xl rounded-[3rem] p-10 border border-pink-100 shadow-2xl shadow-pink-200/20">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label className="text-slate-800 text-[11px] font-black uppercase tracking-widest ml-1">Personnel Email</Label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-5 flex items-center text-slate-400 group-focus-within:text-sky-500 transition-colors">
+                    <Mail size={18} />
+                  </div>
                   <Input
-                    id="email"
                     type="email"
+                    placeholder="name@university.edu"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-white/5 border-white/10 focus:border-blue-500 focus:ring-blue-500/10 py-7 text-white text-base rounded-2xl placeholder:text-slate-600 transition-all"
-                    placeholder="name@example.com"
+                    required
+                    className="bg-white/80 border-pink-50 pl-14 py-7 text-slate-800 placeholder:text-slate-300 focus:border-sky-500 focus:ring-0 rounded-2xl shadow-sm transition-all"
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-rose-500 text-[10px] mt-1 font-black uppercase tracking-widest ml-1 animate-pulse">
-                    {errors.email}
-                  </p>
-                )}
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between px-1">
-                  <Label htmlFor="password" className="text-slate-300 font-bold text-xs uppercase tracking-widest ml-1">
-                    Password
-                  </Label>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center px-1">
+                  <Label className="text-slate-800 text-[11px] font-black uppercase tracking-widest">Access Key</Label>
+                  <Link to="/forgot-password" title="Recover Access" className="text-[10px] font-black uppercase tracking-widest text-pink-500 hover:text-pink-600 transition-colors">Forgot Key?</Link>
                 </div>
-
-                <div className="relative">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-5 flex items-center text-slate-400 group-focus-within:text-sky-500 transition-colors">
+                    <Lock size={18} />
+                  </div>
                   <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
+                    type="password"
+                    placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-white/5 border-white/10 focus:border-blue-500 focus:ring-blue-500/10 py-7 pr-14 text-white text-base rounded-2xl placeholder:text-slate-600 transition-all"
-                    placeholder="••••••••"
+                    required
+                    className="bg-white/80 border-pink-50 pl-14 py-7 text-slate-800 placeholder:text-slate-300 focus:border-sky-500 focus:ring-0 rounded-2xl shadow-sm transition-all"
                   />
-
-                  <div
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-slate-500 hover:text-blue-400 p-2 transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </div>
                 </div>
-
-                {errors.password && (
-                  <p className="text-rose-500 text-[10px] mt-1 font-black uppercase tracking-widest ml-1 animate-pulse">
-                    {errors.password}
-                  </p>
-                )}
               </div>
-
-              <div className="flex items-center justify-between px-1">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input type="checkbox" className="w-4 h-4 rounded border-white/10 bg-white/5 accent-blue-600" />
-                  <span className="text-xs font-bold text-slate-400 group-hover:text-slate-200 transition-colors">Remember me</span>
-                </label>
-                <Link to="/forgot-password" size="sm" className="text-xs font-black uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-colors">
-                  Forgot?
-                </Link>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-8 text-sm font-black uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-blue-900/20 transition-all active:scale-[0.98] mt-4"
-              >
-                {loading ? (
-                   <Loader2 className="animate-spin" size={24} />
-                ) : (
-                  "Sign in to Dashboard"
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-8 pt-8 border-t border-white/5 text-center">
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
-                Don't have an account?{' '}
-                <Link to="/register" className="text-blue-400 font-black hover:text-blue-300 transition-colors">
-                  Create Account
-                </Link>
-              </p>
             </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-slate-800 hover:bg-slate-900 text-white font-black uppercase tracking-[0.3em] py-8 rounded-[1.5rem] text-[11px] transition-all shadow-2xl shadow-slate-200 active:scale-[0.98] disabled:opacity-70 group relative overflow-hidden"
+            >
+              {isLoading ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                <span className="flex items-center justify-center gap-3">
+                  Initialize Access <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </span>
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-10 pt-8 border-t border-pink-50 text-center">
+            <p className="text-slate-400 text-[11px] font-black uppercase tracking-widest">
+              New Personnel?{' '}
+              <Link to="/register" className="text-sky-500 hover:text-sky-600 transition-colors">
+                Apply for Access
+              </Link>
+            </p>
           </div>
         </div>
-        
-        {/* Footer info */}
-        <p className="text-center mt-8 text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] opacity-50">
-          Powered by EaseFind Intelligence
-        </p>
+
+        {/* Trust Footer */}
+        <div className="mt-12 flex items-center justify-center gap-4 text-slate-400 animate-pulse">
+          <ShieldCheck size={16} />
+          <span className="text-[9px] font-black uppercase tracking-[0.4em]">End-to-End Neural Encryption Active</span>
+        </div>
       </div>
     </div>
   );

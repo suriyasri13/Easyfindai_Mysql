@@ -2,7 +2,6 @@ import { X, Send, Bot, User } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-
 import { askChatBot } from '../services/api';
 
 interface AIChatPanelProps {
@@ -16,7 +15,6 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,26 +23,17 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-
     const userMessage = { text: input, isUser: true };
     setMessages(prev => [...prev, userMessage]);
-    
-    // Clear input and trigger typing indicator immediately
     const userQuery = input;
     setInput('');
     setIsTyping(true);
     
     try {
       const data = await askChatBot(userQuery);
-      setMessages(prev => [...prev, {
-        text: data.response,
-        isUser: false
-      }]);
+      setMessages(prev => [...prev, { text: data.response, isUser: false }]);
     } catch (e) {
-      setMessages(prev => [...prev, {
-        text: "I'm having trouble connecting to my neural network right now. Please test your connection and try again!",
-        isUser: false
-      }]);
+      setMessages(prev => [...prev, { text: "I'm having trouble connecting to my neural network right now. Please test your connection and try again!", isUser: false }]);
     } finally {
       setIsTyping(false);
     }
@@ -53,93 +42,79 @@ export default function AIChatPanel({ isOpen, onClose }: AIChatPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-8 bottom-8 w-[420px] h-[600px] bg-white rounded-[2.5rem] shadow-2xl shadow-black/10 z-50 flex flex-col border border-black/5 overflow-hidden transition-all transform duration-500">
+    <div className="fixed right-8 bottom-8 w-[420px] h-[650px] bg-white rounded-[3rem] shadow-2xl z-50 flex flex-col border border-pink-100 overflow-hidden transition-all transform duration-500 font-sans">
       
-      {/* Premium Header */}
-      <div className="bg-gradient-to-r from-primary to-blue-600 text-white p-6 flex items-center justify-between">
+      {/* Soft Premium Header */}
+      <div className="bg-gradient-to-r from-sky-500 to-pink-500 text-white p-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-md border border-white/20">
             <Bot size={24} className="text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-bold tracking-tight">AI Assistant</h3>
+            <h3 className="text-lg font-black tracking-tight uppercase">AI Assistant</h3>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <p className="text-xs font-bold text-white/80 uppercase tracking-widest">Active Now</p>
+              <p className="text-[9px] font-black text-white/80 uppercase tracking-widest">Active Now</p>
             </div>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="hover:bg-white/10 p-2.5 rounded-xl transition-all"
-        >
+        <button onClick={onClose} className="hover:bg-white/10 p-2.5 rounded-xl transition-all">
           <X size={22} />
         </button>
       </div>
 
       {/* Messages Window */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-slate-50/50">
+      <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-gradient-to-b from-sky-50/30 to-pink-50/30">
         {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex items-end gap-3 text-sm ${msg.isUser ? 'flex-row-reverse' : 'flex-row'}`}
-          >
-            {/* Contextual Avatars */}
-            <div className={`flex-shrink-0 w-10 h-10 rounded-[1.25rem] flex items-center justify-center shadow-md transition-transform hover:scale-110 ${
-              msg.isUser 
-                ? 'bg-white text-foreground/50 border border-black/5' 
-                : 'bg-gradient-to-br from-primary to-blue-600 text-white'
+          <div key={idx} className={`flex items-end gap-3 text-sm ${msg.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center shadow-md transition-transform hover:scale-110 ${
+              msg.isUser ? 'bg-white text-slate-400 border border-pink-50' : 'bg-gradient-to-br from-sky-500 to-indigo-500 text-white'
             }`}>
-              {msg.isUser ? <User size={20} /> : <Bot size={20} />}
+              {msg.isUser ? <User size={18} /> : <Bot size={18} />}
             </div>
 
-            {/* Asymmetrical Chat Bubbles */}
-            <div
-              className={`max-w-[80%] p-5 shadow-sm whitespace-pre-line leading-relaxed text-[15px] font-medium transition-all ${
-                msg.isUser
-                  ? 'bg-primary text-white rounded-[1.75rem] rounded-br-none shadow-primary/20'
-                  : 'bg-white text-foreground rounded-[1.75rem] rounded-bl-none border border-black/5'
-              }`}
-            >
+            <div className={`max-w-[80%] p-5 shadow-sm whitespace-pre-line leading-relaxed text-[14px] font-bold transition-all ${
+              msg.isUser
+                ? 'bg-sky-500 text-white rounded-[1.75rem] rounded-br-none shadow-sky-200'
+                : 'bg-white text-slate-800 rounded-[1.75rem] rounded-bl-none border border-pink-50 shadow-pink-100'
+            }`}>
               {msg.text}
             </div>
           </div>
         ))}
 
-        {/* Real-time Typing Indicator */}
         {isTyping && (
           <div className="flex items-end gap-3 text-sm">
-            <div className="flex-shrink-0 w-10 h-10 rounded-[1.25rem] bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center shadow-lg">
-              <Bot size={20} />
+            <div className="flex-shrink-0 w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white flex items-center justify-center shadow-lg">
+              <Bot size={18} />
             </div>
-            <div className="bg-white p-5 rounded-[1.75rem] rounded-bl-none shadow-sm flex items-center gap-2 h-[56px] border border-black/5">
-              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="w-2.5 h-2.5 bg-primary rounded-full animate-bounce"></div>
+            <div className="bg-white p-5 rounded-[1.75rem] rounded-bl-none shadow-pink-100 flex items-center gap-2 h-[56px] border border-pink-50">
+              <div className="w-2 h-2 bg-sky-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 bg-sky-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 bg-sky-500 rounded-full animate-bounce"></div>
             </div>
           </div>
         )}
-
         <div ref={bottomRef} className="h-4" />
       </div>
 
       {/* Input Area */}
-      <div className="p-6 bg-white border-t border-black/5 pb-8">
-        <div className="flex items-center gap-3 bg-slate-100 p-2 rounded-full border border-black/5 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all duration-500">
+      <div className="p-8 bg-white border-t border-pink-50">
+        <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-full border border-pink-50 focus-within:border-sky-500/50 transition-all duration-500">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Type your message..."
-            className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-6 text-base text-foreground placeholder:text-foreground/30 font-medium"
+            className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 px-6 text-sm text-slate-800 placeholder:text-slate-300 font-bold"
             disabled={isTyping}
           />
           <Button
             onClick={handleSend}
             disabled={!input.trim() || isTyping}
-            className="bg-primary hover:bg-primary/90 text-white rounded-full w-[52px] h-[52px] p-0 flex-shrink-0 transition-all active:scale-90 shadow-xl shadow-primary/30"
+            className="bg-slate-800 hover:bg-slate-900 text-white rounded-full w-[52px] h-[52px] p-0 flex-shrink-0 transition-all active:scale-90 shadow-xl"
           >
-            <Send size={22} className="translate-x-[2px] -translate-y-[1px]" />
+            <Send size={20} />
           </Button>
         </div>
       </div>
