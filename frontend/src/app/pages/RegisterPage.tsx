@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -17,7 +17,7 @@ export default function RegisterPage() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLogin, setIsLogin] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<any>({});
 
   const validateEmail = (email: string) => {
@@ -35,19 +35,14 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const newErrors: any = {};
 
     if (!fullName.trim()) newErrors.fullName = "Full name is required";
-
     const emailError = validateEmail(email);
     if (emailError) newErrors.email = emailError;
-
     const passwordError = validatePassword(password);
     if (passwordError) newErrors.password = passwordError;
-
-    if (password !== confirmPassword)
-      newErrors.confirmPassword = "Passwords do not match";
+    if (password !== confirmPassword) newErrors.confirmPassword = "Passwords do not match";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -55,162 +50,125 @@ export default function RegisterPage() {
     }
 
     setErrors({});
+    setLoading(true);
 
     try {
       await registerUser({ name: fullName, email, password });
       toast.success("Registration successful! Please login.");
       navigate("/");
     } catch (error: any) {
-      console.log("Registration error:", error);
       toast.error(error.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#f8fafc]">
-
-      {/* AI Search & Connect Animation Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-[#f8fafc]">
-        {/* Animated Blobs for depth */}
-        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-400/10 rounded-full blur-[120px] animate-blob"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-400/10 rounded-full blur-[120px] animate-blob animation-delay-2000"></div>
-
-
-        {/* The Neural Grid */}
-        <svg className="absolute w-full h-full opacity-[0.1]" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2563eb" strokeWidth="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-          
-          {/* Floating Nodes */}
-          <circle cx="20%" cy="30%" r="3" fill="#2563eb" className="animate-pulse" />
-          <circle cx="80%" cy="20%" r="2" fill="#2563eb" className="animate-pulse delay-700" />
-          <circle cx="40%" cy="70%" r="4" fill="#2563eb" className="animate-pulse delay-1000" />
-          <circle cx="70%" cy="80%" r="3" fill="#2563eb" className="animate-pulse delay-300" />
-          <circle cx="10%" cy="90%" r="2" fill="#2563eb" className="animate-pulse delay-500" />
-        </svg>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      
+      {/* Immersive Background Image with Dark Overlay */}
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-[20s] scale-110 animate-slow-zoom"
+        style={{ backgroundImage: 'url("/background.png")' }}
+      >
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px]"></div>
       </div>
 
-      <div className="w-full max-w-[400px] relative z-10 px-4 py-8">
-        <div className="bg-[#1e293b] py-6 px-8 rounded-t-[2rem] text-center shadow-2xl border-b border-white/5">
-          <h1 className="text-3xl font-black mb-1 tracking-tighter text-white">EaseFind.AI</h1>
-          <p className="text-blue-200 text-[10px] font-bold uppercase tracking-[0.2em]">
-            Identity Registration
-          </p>
-        </div>
-
-        <div className="bg-white px-8 py-8 rounded-b-[2rem] shadow-2xl border border-slate-100">
-          <div className="flex gap-4 mb-10 bg-slate-50 p-2 rounded-2xl">
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="flex-1 py-4 rounded-xl transition-all font-black text-xs uppercase tracking-widest text-slate-400 hover:text-slate-600"
-            >
-              Login
-            </button>
-
-            <button
-              type="button"
-              className="flex-1 py-4 rounded-xl transition-all font-black text-xs uppercase tracking-widest bg-white text-blue-600 shadow-sm"
-            >
-              Register
-            </button>
+      <div className="w-full max-w-[450px] relative z-10 px-4 py-8">
+        {/* Glassmorphic Register Card */}
+        <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden">
+          
+          <div className="py-8 px-8 text-center border-b border-white/5">
+            <h1 className="text-3xl font-black mb-1 tracking-tighter text-white">Join EaseFind.AI</h1>
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+              Create your intelligence profile
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-[#1e293b] font-bold text-sm ml-1">Full Name</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="bg-slate-50 border-slate-100 focus:border-blue-500 focus:ring-blue-500/10 py-6 text-base rounded-xl"
-                placeholder="John Doe"
-              />
-              {errors.fullName && (
-                <p className="text-rose-500 text-xs mt-2 font-bold ml-1">{errors.fullName}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#1e293b] font-bold text-sm ml-1">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-50 border-slate-100 focus:border-blue-500 focus:ring-blue-500/10 py-6 text-base rounded-xl"
-                placeholder="name@example.com"
-              />
-              {errors.email && (
-                <p className="text-rose-500 text-xs mt-2 font-bold ml-1">{errors.email}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-[#1e293b] font-bold text-sm ml-1">Password</Label>
-              <div className="relative">
+          <div className="px-8 py-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="fullName" className="text-slate-300 font-bold text-[10px] uppercase tracking-widest ml-1">Full Name</Label>
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-slate-50 border-slate-100 focus:border-blue-500 focus:ring-blue-500/10 py-6 pr-14 text-base rounded-xl"
-                  placeholder="••••••••"
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="bg-white/5 border-white/10 focus:border-blue-500 focus:ring-blue-500/10 py-6 text-white text-base rounded-xl placeholder:text-slate-600 transition-all"
+                  placeholder="John Doe"
                 />
-                <div
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-slate-300 hover:text-blue-600 p-2"
-                >
-                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                {errors.fullName && <p className="text-rose-500 text-[10px] mt-1 font-bold ml-1">{errors.fullName}</p>}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-slate-300 font-bold text-[10px] uppercase tracking-widest ml-1">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white/5 border-white/10 focus:border-blue-500 focus:ring-blue-500/10 py-6 text-white text-base rounded-xl placeholder:text-slate-600 transition-all"
+                  placeholder="name@example.com"
+                />
+                {errors.email && <p className="text-rose-500 text-[10px] mt-1 font-bold ml-1">{errors.email}</p>}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-slate-300 font-bold text-[10px] uppercase tracking-widest ml-1">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="bg-white/5 border-white/10 focus:border-blue-500 focus:ring-blue-500/10 py-6 pr-12 text-white text-base rounded-xl placeholder:text-slate-600 transition-all"
+                      placeholder="••••••••"
+                    />
+                    <div onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-slate-500 hover:text-blue-400 p-2">
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirmPassword" className="text-slate-300 font-bold text-[10px] uppercase tracking-widest ml-1">Confirm</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="bg-white/5 border-white/10 focus:border-blue-500 focus:ring-blue-500/10 py-6 pr-12 text-white text-base rounded-xl placeholder:text-slate-600 transition-all"
+                      placeholder="••••••••"
+                    />
+                    <div onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-slate-500 hover:text-blue-400 p-2">
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </div>
+                  </div>
                 </div>
               </div>
-              {errors.password && (
-                <p className="text-rose-500 text-xs mt-2 font-bold ml-1">{errors.password}</p>
+              
+              {(errors.password || errors.confirmPassword) && (
+                <p className="text-rose-500 text-[10px] font-bold ml-1">{errors.password || errors.confirmPassword}</p>
               )}
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-7 text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-blue-900/20 transition-all active:scale-[0.98] mt-4"
+              >
+                {loading ? <Loader2 className="animate-spin" size={20} /> : "Create Intelligence Profile"}
+              </Button>
+            </form>
+
+            <div className="mt-8 pt-6 border-t border-white/5 text-center">
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
+                Already registered?{' '}
+                <Link to="/" className="text-blue-400 font-black hover:text-blue-300 transition-colors">
+                  Sign in
+                </Link>
+              </p>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-[#1e293b] font-bold text-sm ml-1">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-slate-50 border-slate-100 focus:border-blue-500 focus:ring-blue-500/10 py-6 pr-14 text-base rounded-xl"
-                  placeholder="••••••••"
-                />
-                <div
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-slate-300 hover:text-blue-600 p-2"
-                >
-                  {showConfirmPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                </div>
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-rose-500 text-xs mt-2 font-bold ml-1">{errors.confirmPassword}</p>
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-7 text-lg font-black uppercase tracking-widest rounded-xl shadow-xl shadow-blue-100 transition-all active:scale-[0.98] mt-4"
-            >
-              Create Account
-            </Button>
-          </form>
-
-          <div className="mt-10 pt-8 border-t border-slate-50 text-center">
-            <p className="text-sm text-slate-400 font-medium">
-              Already a member?{' '}
-              <Link to="/" className="text-blue-600 font-bold hover:underline">
-                Sign in here
-              </Link>
-            </p>
           </div>
         </div>
       </div>
