@@ -12,7 +12,7 @@ import com.lostfound.repository.MatchRepository;
 
 @RestController
 @RequestMapping("/api/dashboard")
-@CrossOrigin(origins = "*")
+
 public class DashboardController {
 
     @Autowired

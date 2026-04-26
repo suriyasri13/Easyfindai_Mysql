@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/claims")
-@CrossOrigin
+
 public class ClaimController {
 
     private final ClaimService claimService;

@@ -15,7 +15,7 @@ import com.lostfound.service.AIService;
 
 @RestController
 @RequestMapping("/api/match")
-@CrossOrigin(origins = "*") // Align with ItemController
+ // Align with ItemController
 public class MatchController {
 
     @Autowired

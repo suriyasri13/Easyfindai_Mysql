@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/voice")
-@CrossOrigin(origins = "*")
+
 public class VoiceController {
 
     private final RestTemplate restTemplate = new RestTemplate();

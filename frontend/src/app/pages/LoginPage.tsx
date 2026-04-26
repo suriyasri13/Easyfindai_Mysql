@@ -8,6 +8,7 @@ import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import bgImage from '../../assets/background.png';
 import Prism from '../components/ui/Prism';
+import { loginUser } from '../services/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,11 +22,20 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await login(email, password);
+      const response = await loginUser({ email, password });
+      
+      const userData = {
+        userId: response.userId,
+        email: response.email,
+        name: response.fullName,
+        role: "user" // Default role
+      };
+
+      login(userData, response.token);
       toast.success('Access Granted', { description: 'Secure session initialized.' });
       navigate('/dashboard');
-    } catch (error) {
-      toast.error('Access Denied', { description: 'Invalid credentials protocol.' });
+    } catch (error: any) {
+      toast.error('Access Denied', { description: error.message || 'Invalid credentials protocol.' });
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +134,7 @@ export default function LoginPage() {
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 <span className="flex items-center justify-center gap-3">
-                  Initialize Access <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  Sign In <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </span>
               )}
             </Button>
@@ -134,7 +144,7 @@ export default function LoginPage() {
             <p className="text-slate-400 text-[11px] font-black uppercase tracking-widest">
               New Personnel?{' '}
               <Link to="/register" className="text-sky-500 hover:text-sky-600 transition-colors">
-                Apply for Access
+                Register
               </Link>
             </p>
           </div>

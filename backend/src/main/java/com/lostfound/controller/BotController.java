@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/chatbot")
-@CrossOrigin(origins = "*")
+
 public class BotController {
 
     private final RestTemplate restTemplate = new RestTemplate();

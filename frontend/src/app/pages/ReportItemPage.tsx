@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { MapPin, Upload, X, Mic, Loader2, Sparkles, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, Upload, Mic, Loader2, Sparkles, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -29,7 +27,6 @@ export default function ReportItemPage() {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [storageLocation, setStorageLocation] = useState('');
-  const [campusZone, setCampusZone] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
@@ -87,58 +84,104 @@ export default function ReportItemPage() {
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
-    recognition.onstart = () => setIsListening(true);
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.info("Microphone active. Please speak your item details...", { duration: 3000 });
+    };
     recognition.onresult = async (event: any) => {
       const transcript = event.results[0][0].transcript;
       setIsListening(false);
       setIsParsing(true);
       try {
         const prompt = `Extract item details: "${transcript}". Return JSON: itemName, category, description, location, date.`;
-        const res = await fetch(`${BASE_URL}/ai/parse-report`, {
+        const res = await fetch(`${BASE_URL}/voice/parse`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
+          body: JSON.stringify({ text: prompt })
         });
+        
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.suggestion || errData.error || "AI Service is offline or unreachable.");
+        }
+        
         const data = await res.json();
         if (data.itemName) setItemName(data.itemName);
         if (data.category && categories.includes(data.category)) setCategory(data.category);
         if (data.description) setDescription(data.description);
         if (data.location) setLocation(data.location);
         if (data.date) setDate(data.date);
-        toast.success("AI has filled the details!");
-      } catch (e) { toast.error("AI parsing failed."); } finally { setIsParsing(false); }
+        
+        toast.success("AI has filled the details successfully!", {
+          description: "Review the filled fields below."
+        });
+      } catch (e: any) { 
+        console.error("AI parse error:", e);
+        toast.error("AI Parsing Failed", {
+          description: e.message || "Please try again."
+        }); 
+      } finally { 
+        setIsParsing(false); 
+      }
     };
-    recognition.onerror = () => setIsListening(false);
+    recognition.onerror = (event: any) => {
+      setIsListening(false);
+      if (event.error === 'not-allowed') {
+        toast.error("Microphone Access Denied", { description: "Please allow microphone access in your browser settings." });
+      } else {
+        toast.error("Voice Recognition Error", { description: event.error || 'Unknown error occurred' });
+      }
+    };
     recognition.start();
   };
 
   const resetForm = () => {
     setItemName(''); setCategory(''); setDescription(''); setContactInfo('');
-    setDate(''); setLocation(''); setStorageLocation(''); setCampusZone('');
+    setDate(''); setLocation(''); setStorageLocation('');
     setImagePreview(null); setImageFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!itemName || !category || !description || !contactInfo || !date || !campusZone || !location) {
-      toast.error("Please fill in all required fields");
+
+    // Per-field validation — tells user exactly what's missing
+    const missingFields: string[] = [];
+    if (!itemName.trim())     missingFields.push('Item Name');
+    if (!category)            missingFields.push('Category');
+    if (!date)                missingFields.push('Date');
+    if (!description.trim())  missingFields.push('Description');
+    if (!location)            missingFields.push(itemType === 'lost' ? 'Lost Location' : 'Found Location');
+    if (!contactInfo.trim())  missingFields.push('Contact Information');
+    if (itemType === 'found' && !storageLocation.trim()) missingFields.push('Current Storage Location');
+
+    if (missingFields.length > 0) {
+      // Show one toast per missing field so they're each clearly visible
+      missingFields.forEach((field, i) => {
+        setTimeout(() => {
+          toast.error(`Missing: ${field}`, { duration: 4000 });
+        }, i * 150);
+      });
       return;
     }
-    setIsSubmitting(true);
-    const formData = new FormData();
-    formData.append("itemType", itemType);
-    formData.append("userId", user.userId.toString());  
-    formData.append("itemName", itemName);
-    formData.append("category", category);
-    formData.append("description", description);
-    formData.append("contactInfo", contactInfo);
-    formData.append("dateLost", date);
-    const finalLocation = `${campusZone} - ${location}`;
-    formData.append("location", finalLocation);
-    if (itemType === "found") formData.append("storageLocation", storageLocation || "N/A");
-    if (imageFile) formData.append("image", imageFile);
 
+    setIsSubmitting(true);
     try {
+      if (!user || !user.userId) {
+        throw new Error("User session expired. Please log in again.");
+      }
+
+      const formData = new FormData();
+      formData.append("itemType", itemType);
+      formData.append("userId", user.userId.toString());  
+      formData.append("itemName", itemName);
+      formData.append("category", category);
+      formData.append("description", description);
+      formData.append("contactInfo", contactInfo);
+      formData.append("dateLost", date);
+      formData.append("location", location);
+      if (itemType === "found") formData.append("storageLocation", storageLocation || "N/A");
+      if (imageFile) formData.append("image", imageFile);
+
       await reportItem(formData);
       toast.success("Item reported successfully!");
       resetForm();
@@ -146,6 +189,7 @@ export default function ReportItemPage() {
       toast.error(error.message || "Failed to report item");
     } finally { setIsSubmitting(false); }
   };
+
 
   return (
     <div className="max-w-2xl mx-auto pb-12 relative z-10">
@@ -202,42 +246,41 @@ export default function ReportItemPage() {
           </div>
 
           <div>
-            <Label className="text-slate-800 text-[10px] font-black uppercase tracking-widest mb-2 block">Campus Zone *</Label>
-            <Select value={campusZone} onValueChange={setCampusZone}>
-              <SelectTrigger className="bg-white/80 border-pink-50 text-slate-800 text-xs py-5 rounded-xl">
-                <SelectValue placeholder="Select Campus Area (Classroom, Library, etc.)" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-pink-50">
-                {campusLocations.map((loc) => <SelectItem key={loc} value={loc} className="text-xs">{loc}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <Label className="text-slate-800 text-[10px] font-black uppercase tracking-widest mb-2 block">Description *</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Details..." className="bg-white/80 border-pink-50 text-slate-800 min-h-[100px] text-xs p-4 rounded-xl shadow-sm" />
           </div>
 
-          <div className="bg-white/40 backdrop-blur-md rounded-2xl p-6 border border-pink-50 space-y-4">
+          {itemType === 'lost' && (
             <div>
-              <Label className="text-slate-800 text-[10px] font-black uppercase tracking-widest mb-3 block">
-                {itemType === 'lost' ? 'Found / Last Seen Location Details *' : 'Precise Found Location *'}
-              </Label>
-              <div className="flex gap-2 mb-3">
-                <Button type="button" onClick={handleEnableLocation} disabled={isFetchingLocation} className="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[8px] py-4 rounded-xl">
-                  <MapPin size={14} className="mr-2" /> {isFetchingLocation ? 'Locating...' : 'Auto-detect'}
-                </Button>
-              </div>
-              <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Specific spot detail..." className="bg-white border-pink-50 text-slate-800 text-xs py-5 rounded-xl" />
+              <Label className="text-slate-800 text-[10px] font-black uppercase tracking-widest mb-2 block">Lost Location *</Label>
+              <Select value={location} onValueChange={setLocation}>
+                <SelectTrigger className="bg-white/80 border-pink-50 text-slate-800 text-xs py-5 rounded-xl">
+                  <SelectValue placeholder="Select where you lost it (Classroom, Library, etc.)" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-pink-50">
+                  {campusLocations.map((loc) => <SelectItem key={loc} value={loc} className="text-xs">{loc}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
+          )}
 
-            {itemType === 'found' && (
-              <div className="animate-in fade-in slide-in-from-top-2">
+          {itemType === 'found' && (
+            <div className="bg-white/40 backdrop-blur-md rounded-2xl p-6 border border-pink-50 space-y-4 animate-in fade-in slide-in-from-top-2">
+              <div>
+                <Label className="text-slate-800 text-[10px] font-black uppercase tracking-widest mb-3 block">Found Location *</Label>
+                <div className="flex gap-2 mb-3">
+                  <Button type="button" onClick={handleEnableLocation} disabled={isFetchingLocation} className="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[8px] py-4 rounded-xl">
+                    <MapPin size={14} className="mr-2" /> {isFetchingLocation ? 'Locating...' : 'Auto-detect'}
+                  </Button>
+                </div>
+                <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Where did you find it? (e.g., Canteen, near exit)" className="bg-white border-pink-50 text-slate-800 text-xs py-5 rounded-xl" />
+              </div>
+              <div>
                 <Label className="text-slate-800 text-[10px] font-black uppercase tracking-widest mb-3 block">Current Storage Location *</Label>
                 <Input value={storageLocation} onChange={(e) => setStorageLocation(e.target.value)} placeholder="Where is it now? (e.g., Security, My Desk)" className="bg-white border-pink-50 text-slate-800 text-xs py-5 rounded-xl" />
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <div>
             <Label className="text-slate-800 text-[10px] font-black uppercase tracking-widest mb-2 block">Contact Information *</Label>
@@ -258,7 +301,7 @@ export default function ReportItemPage() {
 
           <div className="pt-4 space-y-3">
             <Button type="submit" disabled={isSubmitting} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-black uppercase tracking-[0.2em] py-6 rounded-2xl text-[10px] transition-all shadow-lg group">
-              {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <span>Initialize Protocol <Sparkles size={14} className="inline ml-2 text-sky-400" /></span>}
+              {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <span>Submit <Sparkles size={14} className="inline ml-2 text-sky-400" /></span>}
             </Button>
             
             <Button 
