@@ -38,7 +38,7 @@ public class SecureChatController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @org.springframework.beans.factory.annotation.Value("${ai.server.url:http://localhost:5000}")
+    @org.springframework.beans.factory.annotation.Value("${AI_SERVER_URL:http://localhost:5000}")
     private String aiServerUrl;
 
     // 1. Get messages for a match (and trigger AI Bot if empty)

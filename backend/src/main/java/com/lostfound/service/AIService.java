@@ -23,7 +23,7 @@ public class AIService {
     private final WebClient webClient;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public AIService(@org.springframework.beans.factory.annotation.Value("${ai.server.url:http://localhost:5000}") String aiServerUrl) {
+    public AIService(@org.springframework.beans.factory.annotation.Value("${AI_SERVER_URL:http://localhost:5000}") String aiServerUrl) {
         // Set a 10-second connect + read timeout so we never hang if Python AI is offline
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000)

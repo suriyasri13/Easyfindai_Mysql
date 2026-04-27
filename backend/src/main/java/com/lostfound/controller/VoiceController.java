@@ -14,7 +14,7 @@ public class VoiceController {
 
     private final RestTemplate restTemplate = new RestTemplate();
     
-    @org.springframework.beans.factory.annotation.Value("${ai.server.url:http://localhost:5000}")
+    @org.springframework.beans.factory.annotation.Value("${AI_SERVER_URL:http://localhost:5000}")
     private String aiServerUrl;
 
     @PostMapping("/parse")
