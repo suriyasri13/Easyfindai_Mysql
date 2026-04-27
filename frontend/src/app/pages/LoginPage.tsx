@@ -80,7 +80,7 @@ export default function LoginPage() {
             <Search className="text-white w-10 h-10" />
           </div>
           <h1 className="text-4xl font-black text-slate-800 tracking-tighter mb-2">EaseFind<span className="text-sky-500">.AI</span></h1>
-          <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Secure Intelligence Access</p>
+          <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Secure Login</p>
         </div>
 
         {/* Login Card */}

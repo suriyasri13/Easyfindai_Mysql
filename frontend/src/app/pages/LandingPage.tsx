@@ -61,7 +61,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-6">
             <Link to="/login" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-sky-500 transition-colors">Sign In</Link>
             <Link to="/register" className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all shadow-xl shadow-slate-200 hover:bg-slate-900 hover:-translate-y-1 active:scale-95">
-              Join Protocol
+              Register Now
             </Link>
           </div>
         </div>

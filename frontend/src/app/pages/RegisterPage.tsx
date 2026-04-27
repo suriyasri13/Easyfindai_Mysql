@@ -71,7 +71,7 @@ export default function RegisterPage() {
             <Search className="text-white w-10 h-10" />
           </div>
           <h1 className="text-4xl font-black text-slate-800 tracking-tighter mb-2">EaseFind<span className="text-sky-500">.AI</span></h1>
-          <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">New Personnel Registration</p>
+          <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Create Account</p>
         </div>
 
         {/* Register Card */}
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 <span className="flex items-center justify-center gap-3">
-                  Initialize Protocol <Zap size={18} className="group-hover:scale-110 transition-transform" />
+                  Submit <Zap size={18} className="group-hover:scale-110 transition-transform" />
                 </span>
               )}
             </Button>
