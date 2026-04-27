@@ -16,14 +16,37 @@ export default function DashboardHome() {
     successRate: 0
   });
 
-  useEffect(() => {
+  const [activities, setActivities] = useState<any[]>([]);
 
+  useEffect(() => {
+    // 📊 Fetch stats
     axios.get(`${BASE_URL}/dashboard/stats`)
-      .then(res => {
-        setStatsData(res.data);
-      })
+      .then(res => setStatsData(res.data))
       .catch(err => console.error(err));
 
+    // 🕒 Fetch recent activity feed
+    const fetchActivity = async () => {
+      try {
+        const [lost, found, matches] = await Promise.all([
+          axios.get(`${BASE_URL}/lost-items`),
+          axios.get(`${BASE_URL}/found-items`),
+          axios.get(`${BASE_URL}/match`)
+        ]);
+
+        const combined = [
+          ...lost.data.map((i: any) => ({ ...i, type: 'lost', time: i.createdAt || i.dateLost })),
+          ...found.data.map((i: any) => ({ ...i, type: 'found', time: i.createdAt || i.dateFound })),
+          ...matches.data.map((i: any) => ({ ...i, type: 'match', time: i.matchDate || new Date() }))
+        ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .slice(0, 5); // Show latest 5
+
+        setActivities(combined);
+      } catch (err) {
+        console.error("Activity fetch failed:", err);
+      }
+    };
+
+    fetchActivity();
   }, []);
 
   const stats = [
@@ -90,44 +113,40 @@ export default function DashboardHome() {
         </div>
 
         <div className="space-y-6">
-          <div className="flex items-center gap-6 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 hover:bg-white hover:shadow-lg transition-all group">
-            <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm">
-              <CheckCircle size={28} />
-            </div>
-            <div className="flex-1">
-              <p className="text-lg text-[#1e293b] font-bold">New match found for "Laptop"</p>
-              <p className="text-slate-500 font-medium">2 hours ago</p>
-            </div>
-            <div className="px-5 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-200">
-              Match
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 hover:bg-white hover:shadow-lg transition-all group">
-            <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
-              <Search size={28} />
-            </div>
-            <div className="flex-1">
-              <p className="text-lg text-[#1e293b] font-bold">Found item "Wallet" reported</p>
-              <p className="text-slate-500 font-medium">5 hours ago</p>
-            </div>
-            <div className="px-5 py-2 bg-blue-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-200">
-              Found
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 hover:bg-white hover:shadow-lg transition-all group">
-            <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center shadow-sm">
-              <Package size={28} />
-            </div>
-            <div className="flex-1">
-              <p className="text-lg text-[#1e293b] font-bold">Lost item "Keys" reported</p>
-              <p className="text-slate-500 font-medium">1 day ago</p>
-            </div>
-            <div className="px-5 py-2 bg-rose-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-200">
-              Lost
-            </div>
-          </div>
+          {activities.length === 0 ? (
+            <p className="text-slate-500 text-center py-10">No recent activity protocol detected.</p>
+          ) : (
+            activities.map((act, i) => (
+              <div key={i} className="flex items-center gap-6 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 hover:bg-white hover:shadow-lg transition-all group animate-in fade-in slide-in-from-bottom-2">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm ${
+                  act.type === 'lost' ? 'bg-rose-100 text-rose-600' : 
+                  act.type === 'found' ? 'bg-blue-100 text-blue-600' : 
+                  'bg-emerald-100 text-emerald-600'
+                }`}>
+                  {act.type === 'lost' ? <Package size={28} /> : 
+                   act.type === 'found' ? <Search size={28} /> : 
+                   <CheckCircle size={28} />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg text-[#1e293b] font-bold">
+                    {act.type === 'match' 
+                      ? `AI Match: ${act.lostItem?.itemName} & ${act.foundItem?.itemName}`
+                      : `${act.type === 'lost' ? 'Lost' : 'Found'} item "${act.itemName}" reported`}
+                  </p>
+                  <p className="text-slate-500 font-medium text-sm">
+                    {new Date(act.time).toLocaleDateString()} • By {act.user?.fullName || act.finder?.fullName || 'Anonymous'}
+                  </p>
+                </div>
+                <div className={`px-5 py-2 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg ${
+                  act.type === 'lost' ? 'bg-rose-500 shadow-rose-200' : 
+                  act.type === 'found' ? 'bg-blue-500 shadow-blue-200' : 
+                  'bg-emerald-500 shadow-emerald-200'
+                }`}>
+                  {act.type}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
