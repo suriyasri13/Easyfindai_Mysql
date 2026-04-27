@@ -39,7 +39,7 @@ public class BotController {
         } catch (Exception e) {
             e.printStackTrace();
             // Fallback response if Python is down
-            return ResponseEntity.ok(Map.of("response", "Our AI service is currently restarting. I can still help you with:\n• Reporting items\n• Understanding AI tracking\n• Claiming matches\n\nPlease try again in a few moments!"));
+            return ResponseEntity.ok(Map.of("response", "Our AI service is currently restarting. (Target: " + aiServerUrl + ")\nI can still help you with:\n• Reporting items\n• Understanding AI tracking\n• Claiming matches\n\nPlease try again in a few moments!"));
         }
     }
 }

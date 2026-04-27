@@ -29,6 +29,7 @@ public class VoiceController {
             Map<String, String> pythonRequest = new HashMap<>();
             pythonRequest.put("text", text);
 
+            System.out.println("VOICE_AI -> Forwarding request to: " + aiServerUrl + "/voice");
             ResponseEntity<Map> aiResponse = restTemplate.postForEntity(aiServerUrl + "/voice", pythonRequest, Map.class);
             return ResponseEntity.ok(aiResponse.getBody());
 
@@ -37,7 +38,7 @@ public class VoiceController {
             return ResponseEntity.status(500).body(Map.of(
                 "error", "AI Service Connection Failed",
                 "details", e.getMessage(),
-                "suggestion", "Please restart your Python AI server (AI/api/app.py) and ensure it is listening on port 5000."
+                "suggestion", "Check if " + aiServerUrl + " is online. Ensure your laptop can reach the internet."
             ));
         }
     }

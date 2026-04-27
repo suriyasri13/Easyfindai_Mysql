@@ -1,13 +1,18 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, ShieldCheck, Zap, ArrowRight, Brain, HelpCircle } from 'lucide-react';
-import TextType from '../components/ui/TextType';
-import bgImage from '../../assets/background.png';
-import Prism from '../components/ui/Prism';
-import UserGuideModal from '../components/UserGuideModal';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function LandingPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+
+  // If user is already logged in, take them to the dashboard automatically
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-sky-50 to-white font-sans text-slate-800 overflow-x-hidden relative">

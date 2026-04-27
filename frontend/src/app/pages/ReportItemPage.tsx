@@ -126,10 +126,16 @@ export default function ReportItemPage() {
     };
     recognition.onerror = (event: any) => {
       setIsListening(false);
-      if (event.error === 'not-allowed') {
-        toast.error("Microphone Access Denied", { description: "Please allow microphone access in your browser settings." });
+      console.error("Speech Recognition Error:", event.error);
+      if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+        toast.error("Microphone Access Denied", { 
+          description: "Chrome has blocked the microphone. Please click the 'Lock' icon in your address bar and set Microphone to 'Allow'.",
+          duration: 6000 
+        });
+      } else if (event.error === 'network') {
+        toast.error("Network Error", { description: "Please check your internet connection and try again." });
       } else {
-        toast.error("Voice Recognition Error", { description: event.error || 'Unknown error occurred' });
+        toast.error("Voice Recognition Error", { description: `Error: ${event.error}. Please try again.` });
       }
     };
     recognition.start();
