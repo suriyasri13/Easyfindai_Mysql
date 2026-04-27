@@ -76,9 +76,9 @@ export default function MatchResultsPage() {
   }, [user]);
 
   const fetchMatches = async () => {
-    if (!user) return;
     try {
-      const data = await getMatches(user.userId);
+      // Fetch ALL matches for the global history view
+      const data = await getMatches(); 
       setMatches(data);
     } catch (error) {
       console.error("Error fetching matches:", error);
@@ -155,12 +155,14 @@ export default function MatchResultsPage() {
             AI identifying potential item reunions
           </p>
         </div>
-        <Button 
-          onClick={handleClearAll}
-          className="bg-white/50 text-slate-500 hover:text-rose-500 border border-pink-100 px-6 py-3 rounded-xl transition-all font-black uppercase tracking-widest text-[9px] shadow-sm"
-        >
-          Clear All Matches
-        </Button>
+        {matches.some(m => m.lostItem.userId?.toString() === user?.userId?.toString() || m.foundItem.userId?.toString() === user?.userId?.toString()) && (
+          <Button 
+            onClick={handleClearAll}
+            className="bg-white/50 text-slate-500 hover:text-rose-500 border border-pink-100 px-6 py-3 rounded-xl transition-all font-black uppercase tracking-widest text-[9px] shadow-sm"
+          >
+            Clear My Matches
+          </Button>
+        )}
       </div>
 
       {matches.length === 0 ? (
@@ -193,13 +195,16 @@ export default function MatchResultsPage() {
                 </div>
               )}
 
-              <button
-                onClick={() => handleDeleteMatch(match.id)}
-                className="absolute top-8 right-16 p-4 bg-white/80 backdrop-blur-md hover:bg-pink-500 text-slate-400 hover:text-white rounded-2xl transition-all opacity-0 group-hover:opacity-100 z-30"
-                title="Clear Match"
-              >
-                <Trash2 size={20} />
-              </button>
+              {(match.lostItem.userId?.toString() === user?.userId?.toString() || 
+                match.foundItem.userId?.toString() === user?.userId?.toString()) && (
+                <button
+                  onClick={() => handleDeleteMatch(match.id)}
+                  className="absolute top-8 right-16 p-4 bg-white/80 backdrop-blur-md hover:bg-pink-500 text-slate-400 hover:text-white rounded-2xl transition-all opacity-0 group-hover:opacity-100 z-30"
+                  title="Clear Match"
+                >
+                  <Trash2 size={20} />
+                </button>
+              )}
 
               <div className="flex items-center justify-between mb-8 flex-wrap gap-6">
                 <div className="flex items-center gap-6">
@@ -235,32 +240,43 @@ export default function MatchResultsPage() {
                 </div>
                 
                 <div className="flex gap-4">
-                  <Button
-                    onClick={() => openChat(match)}
-                    className="bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
-                  >
-                    <MessageSquare size={16} className="mr-2" />
-                    Open Chat
-                  </Button>
-                  
-                  {match.status !== 'RESOLVED' && (
-                    <Button
-                      onClick={() => { setSelectedMatch(match); setIsQRModalOpen(true); }}
-                      className="bg-pink-500 hover:bg-pink-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
-                    >
-                      <QrCode size={16} className="mr-2" />
-                      {match.lostItem.userId?.toString() === user?.userId?.toString() ? "Generate QR" : "Scan QR"}
-                    </Button>
-                  )}
-                  
-                  {match.status !== 'RESOLVED' && (
-                    <Button
-                      onClick={() => handleConfirmMatch(match.id)}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
-                    >
-                      <CheckCircle size={16} className="mr-2" />
-                      Mark Recovered
-                    </Button>
+                  {(match.lostItem.userId?.toString() === user?.userId?.toString() || 
+                    match.foundItem.userId?.toString() === user?.userId?.toString()) ? (
+                    <>
+                      <Button
+                        onClick={() => openChat(match)}
+                        className="bg-sky-500 hover:bg-sky-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
+                      >
+                        <MessageSquare size={16} className="mr-2" />
+                        Open Chat
+                      </Button>
+                      
+                      {match.status !== 'RESOLVED' && (
+                        <Button
+                          onClick={() => { setSelectedMatch(match); setIsQRModalOpen(true); }}
+                          className="bg-pink-500 hover:bg-pink-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
+                        >
+                          <QrCode size={16} className="mr-2" />
+                          {match.lostItem.userId?.toString() === user?.userId?.toString() ? "Generate QR" : "Scan QR"}
+                        </Button>
+                      )}
+                      
+                      {match.status !== 'RESOLVED' && (
+                        <Button
+                          onClick={() => handleConfirmMatch(match.id)}
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[9px] py-4 px-6 rounded-xl transition-all shadow-md"
+                        >
+                          <CheckCircle size={16} className="mr-2" />
+                          Mark Recovered
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="bg-white/40 px-6 py-3 rounded-xl border border-pink-50">
+                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                        Private Interaction Required
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
