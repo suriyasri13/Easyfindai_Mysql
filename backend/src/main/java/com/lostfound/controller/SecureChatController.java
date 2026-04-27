@@ -38,6 +38,9 @@ public class SecureChatController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @org.springframework.beans.factory.annotation.Value("${ai.server.url:http://localhost:5000}")
+    private String aiServerUrl;
+
     // 1. Get messages for a match (and trigger AI Bot if empty)
     @GetMapping("/{matchId}")
     public List<ChatMessage> getMessages(@PathVariable Long matchId) {
@@ -52,7 +55,7 @@ public class SecureChatController {
                     payload.put("lost_desc", match.getLostItem().getDescription());
                     payload.put("found_desc", match.getFoundItem().getDescription());
                     
-                    ResponseEntity<Map> response = restTemplate.postForEntity("http://localhost:5000/moderate", payload, Map.class);
+                    ResponseEntity<Map> response = restTemplate.postForEntity(aiServerUrl + "/moderate", payload, Map.class);
                     String botMessage = (String) response.getBody().get("message");
                     
                     ChatMessage botChat = new ChatMessage();

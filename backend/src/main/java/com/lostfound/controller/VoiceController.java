@@ -13,7 +13,9 @@ import java.util.HashMap;
 public class VoiceController {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String PYTHON_VOICE_URL = "http://localhost:5000/voice";
+    
+    @org.springframework.beans.factory.annotation.Value("${ai.server.url:http://localhost:5000}")
+    private String aiServerUrl;
 
     @PostMapping("/parse")
     public ResponseEntity<?> parseVoiceText(@RequestBody Map<String, String> payload) {
@@ -27,7 +29,7 @@ public class VoiceController {
             Map<String, String> pythonRequest = new HashMap<>();
             pythonRequest.put("text", text);
 
-            ResponseEntity<Map> aiResponse = restTemplate.postForEntity(PYTHON_VOICE_URL, pythonRequest, Map.class);
+            ResponseEntity<Map> aiResponse = restTemplate.postForEntity(aiServerUrl + "/voice", pythonRequest, Map.class);
             return ResponseEntity.ok(aiResponse.getBody());
 
         } catch (Exception e) {
@@ -49,7 +51,7 @@ public class VoiceController {
             org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, Object>> requestEntity = 
                 new org.springframework.http.HttpEntity<>(body, new org.springframework.http.HttpHeaders());
 
-            ResponseEntity<Map> aiResponse = restTemplate.postForEntity("http://localhost:5000/verify-image", requestEntity, Map.class);
+            ResponseEntity<Map> aiResponse = restTemplate.postForEntity(aiServerUrl + "/verify-image", requestEntity, Map.class);
             return ResponseEntity.ok(aiResponse.getBody());
 
         } catch (Exception e) {

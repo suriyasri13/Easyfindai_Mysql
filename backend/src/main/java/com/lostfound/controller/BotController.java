@@ -16,7 +16,9 @@ import java.util.HashMap;
 public class BotController {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String PYTHON_AI_URL = "http://localhost:5000/chat";
+    
+    @org.springframework.beans.factory.annotation.Value("${ai.server.url:http://localhost:5000}")
+    private String aiServerUrl;
 
     @PostMapping("/ask")
     public ResponseEntity<?> askChatBot(@RequestBody Map<String, String> requestData) {
@@ -31,7 +33,7 @@ public class BotController {
             pythonRequest.put("query", query);
 
             // POST to Python
-            ResponseEntity<Map> aiResponse = restTemplate.postForEntity(PYTHON_AI_URL, pythonRequest, Map.class);
+            ResponseEntity<Map> aiResponse = restTemplate.postForEntity(aiServerUrl + "/chat", pythonRequest, Map.class);
             return ResponseEntity.ok(aiResponse.getBody());
 
         } catch (Exception e) {
