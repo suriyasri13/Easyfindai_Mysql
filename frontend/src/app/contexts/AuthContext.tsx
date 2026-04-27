@@ -5,6 +5,7 @@ import {
   ReactNode,
   useEffect,
 } from "react";
+import { registerUser } from "../services/api";
 
 interface User {
   userId: number;   
@@ -17,6 +18,7 @@ interface AuthContextType {
   user: User | null;
   loading:boolean;
   login: (userData: User, token: string) => void;
+  register: (fullName: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -42,6 +44,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("user", JSON.stringify(userData));
   };
 
+  const register = async (fullName: string, email: string, password: string) => {
+    const response = await registerUser({ fullName, email, password });
+    
+    // Auto-login after registration
+    const userData: User = {
+      userId: response.userId,
+      email: response.email,
+      name: response.fullName,
+      role: "user"
+    };
+    login(userData, response.token);
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");
@@ -49,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user,loading, login, logout }}>
+    <AuthContext.Provider value={{ user,loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
